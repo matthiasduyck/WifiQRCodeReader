@@ -26,6 +26,8 @@ using ZXing;
 using Windows.UI.Xaml.Media.Imaging;
 using Windows.Storage;
 using Windows.Graphics.Imaging;
+using Wifi_QR_code_scanner.Managers;
+using Wifi_QR_code_scanner.Business;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -34,126 +36,61 @@ namespace Wifi_QR_code_scanner
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
+    public delegate void QrCodeDecodedDelegate(string qrmessage);
 
-    
     public sealed partial class MainPage : Page
     {
-        MediaCapture mediaCapture;
-        bool isPreviewing;
-        DisplayRequest displayRequest = new DisplayRequest();
+
+        QRCameraManager cameraManager;
+        WifiConnectionManager wifiConnectionManager;
+        
         public MainPage()
         {
             this.InitializeComponent();
+            QrCodeDecodedDelegate handler = new QrCodeDecodedDelegate(handleQRcodeFound);
+            cameraManager = new QRCameraManager(PreviewControl, Dispatcher, handler);
+            wifiConnectionManager = new WifiConnectionManager();
             //Windows.Devices.WiFi.;
             Application.Current.Suspending += Application_Suspending;
-            StartPreviewAsync();
+            cameraManager.StartPreviewAsync();
         }
-        private async Task StartPreviewAsync()
+
+        public async void handleQRcodeFound(string qrmessage)
         {
-            try
-            {
+            var msgbox = new MessageDialog(qrmessage);
+            // Add commands and set their callbacks; both buttons use the same callback function instead of inline event handlers
+            msgbox.Commands.Add(new UICommand(
+                "Connect",
+                new UICommandInvokedHandler(this.ConnectHandler),qrmessage));
+            msgbox.Commands.Add(new UICommand(
+                "Close",
+                new UICommandInvokedHandler(this.CancelHandler)));
 
-                mediaCapture = new MediaCapture();
-                await mediaCapture.InitializeAsync();
-                
+            // Set the command that will be invoked by default
+            msgbox.DefaultCommandIndex = 0;
 
-                displayRequest.RequestActive();
-                DisplayInformation.AutoRotationPreferences = DisplayOrientations.Landscape;
-            }
-            catch (UnauthorizedAccessException)
-            {
-                // This will be thrown if the user denied access to the camera in privacy settings
-                //ShowMessageToUser("The app was denied access to the camera");
-                return;
-            }
+            // Set the command to be invoked when escape is pressed
+            msgbox.CancelCommandIndex = 1;
 
-            try
-            {
-                PreviewControl.Source = mediaCapture;
-                await mediaCapture.StartPreviewAsync();
-                isPreviewing = true;
-                int imgCaptureWidth = 800;
-                int imgCaptureHeight = 800;
-                var imgProp = new ImageEncodingProperties
-                {
-                    Subtype = "BMP",
-                    Width = (uint)imgCaptureWidth,
-                    Height = (uint)imgCaptureHeight
-                };
-                var bcReader = new BarcodeReader();
-
-                var exit = 0;
-                while (exit == 0)
-                {
-                    var stream = new InMemoryRandomAccessStream();
-                    await mediaCapture.CapturePhotoToStreamAsync(imgProp, stream);
-
-
-                    stream.Seek(0);
-                    var wbm = new WriteableBitmap(imgCaptureWidth, imgCaptureHeight);
-                    await wbm.SetSourceAsync(stream);
-                    var result = bcReader.Decode(wbm);
-
-
-                    if (result != null)
-                    {
-                        var torch = mediaCapture.VideoDeviceController.TorchControl;
-                        
-                        if (torch.Supported) torch.Enabled = false;
-                        //await mediaCapture.StopPreviewAsync();
-                        var msgbox = new MessageDialog(result.Text);
-                        await msgbox.ShowAsync();
- 
-                    }
-
-                }
-            }
-            catch (System.IO.FileLoadException)
-            {
-                mediaCapture.CaptureDeviceExclusiveControlStatusChanged += mediaCapture_CaptureDeviceExclusiveControlStatusChanged;
-            }
+            // Show the message dialog
+            await msgbox.ShowAsync();
         }
-        private async void mediaCapture_CaptureDeviceExclusiveControlStatusChanged(MediaCapture sender, MediaCaptureDeviceExclusiveControlStatusChangedEventArgs args)
+
+        private void ConnectHandler(IUICommand command)
         {
-            if (args.Status == MediaCaptureDeviceExclusiveControlStatus.SharedReadOnlyAvailable)
-            {
-                //ShowMessageToUser("The camera preview can't be displayed because another app has exclusive access");
-            }
-            else if (args.Status == MediaCaptureDeviceExclusiveControlStatus.ExclusiveControlAvailable && !isPreviewing)
-            {
-                await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
-                {
-                    await StartPreviewAsync();
-                });
-            }
+            var wifistringToConnectTo = command.Id as string;
+            var wifiAPdata = WifiStringParser.parseWifiString(wifistringToConnectTo);
+            this.wifiConnectionManager.ConnectToWifiNetwork(wifiAPdata);
         }
 
-        private async Task CleanupCameraAsync()
+        private void CancelHandler(IUICommand command)
         {
-            if (mediaCapture != null)
-            {
-                if (isPreviewing)
-                {
-                    await mediaCapture.StopPreviewAsync();
-                }
-
-                await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-                {
-                    PreviewControl.Source = null;
-                    if (displayRequest != null)
-                    {
-                        displayRequest.RequestRelease();
-                    }
-
-                    mediaCapture.Dispose();
-                    mediaCapture = null;
-                });
-            }
-
+            //todo: do something
         }
+
         protected async override void OnNavigatedFrom(NavigationEventArgs e)
         {
-            await CleanupCameraAsync();
+            await cameraManager.CleanupCameraAsync();
         }
         private async void Application_Suspending(object sender, SuspendingEventArgs e)
         {
@@ -161,7 +98,7 @@ namespace Wifi_QR_code_scanner
             if (Frame.CurrentSourcePageType == typeof(MainPage))
             {
                 var deferral = e.SuspendingOperation.GetDeferral();
-                await CleanupCameraAsync();
+                await cameraManager.CleanupCameraAsync();
                 deferral.Complete();
             }
         }

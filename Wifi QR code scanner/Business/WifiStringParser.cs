@@ -1,0 +1,21 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Wifi_QR_code_scanner.Business
+{
+    public class WifiStringParser
+    {
+        public static WifiAccessPointData parseWifiString(string wifiString)
+        {
+            var result = new WifiAccessPointData();
+            var splitWifiString = wifiString.Split(';');
+            result.ssid = splitWifiString[0].Split(':')[2];
+            result.password = splitWifiString[2].Split(':')[1];
+            
+            return result;
+        }
+    }
+}
