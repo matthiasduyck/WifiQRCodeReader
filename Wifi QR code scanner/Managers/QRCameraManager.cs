@@ -20,8 +20,10 @@ namespace Wifi_QR_code_scanner.Managers
         DisplayRequest displayRequest = new DisplayRequest();
         CaptureElement previewWindowElement;
         CoreDispatcher dispatcher;
-        CancellationToken qrAnalyzerCancellationToken;
+        CancellationTokenSource qrAnalyzerCancellationTokenSource;
         QrCodeDecodedDelegate qrCodeDecodedDelegate;
+
+        public bool ScanForQRcodes { get; set; }
 
         public QRCameraManager(CaptureElement previewWindowElement, CoreDispatcher dispatcher, QrCodeDecodedDelegate qrCodeDecodedDelegate)
         {
@@ -29,7 +31,7 @@ namespace Wifi_QR_code_scanner.Managers
             this.dispatcher = dispatcher;
             this.qrCodeDecodedDelegate = qrCodeDecodedDelegate;
             var qrAnalyzerCancellationTokenSource = new CancellationTokenSource();
-            this.qrAnalyzerCancellationToken = qrAnalyzerCancellationTokenSource.Token;
+            this.qrAnalyzerCancellationTokenSource = qrAnalyzerCancellationTokenSource;
         }
         public async Task StartPreviewAsync()
         {
@@ -50,6 +52,7 @@ namespace Wifi_QR_code_scanner.Managers
 
             try
             {
+                this.ScanForQRcodes = true;
                 previewWindowElement.Source = mediaCapture;
                 await mediaCapture.StartPreviewAsync();
                 isPreviewing = true;
@@ -62,17 +65,17 @@ namespace Wifi_QR_code_scanner.Managers
                     Height = (uint)imgCaptureHeight
                 };
                 var bcReader = new BarcodeReader();
-
-                var exit = 0;
                 
-                while (exit == 0)
+                while (!qrAnalyzerCancellationTokenSource.Token.IsCancellationRequested)
                 {
                     //try capture qr code here
+                    if (ScanForQRcodes)
+                    {
+                        await findQRinImageAsync(imgCaptureWidth, imgCaptureHeight, imgProp, bcReader);
+                    }
 
                     var qrCaptureInterval = 500;
-
-                    await findQRinImageAsync(imgCaptureWidth, imgCaptureHeight, imgProp, bcReader);
-                    await Task.Delay(qrCaptureInterval, qrAnalyzerCancellationToken);
+                    await Task.Delay(qrCaptureInterval, qrAnalyzerCancellationTokenSource.Token);
                 }
             }
             catch (System.IO.FileLoadException)
@@ -80,6 +83,7 @@ namespace Wifi_QR_code_scanner.Managers
                 mediaCapture.CaptureDeviceExclusiveControlStatusChanged += mediaCapture_CaptureDeviceExclusiveControlStatusChanged;
             }
         }
+
         private async void mediaCapture_CaptureDeviceExclusiveControlStatusChanged(MediaCapture sender, MediaCaptureDeviceExclusiveControlStatusChangedEventArgs args)
         {
             if (args.Status == MediaCaptureDeviceExclusiveControlStatus.SharedReadOnlyAvailable)
@@ -133,6 +137,8 @@ namespace Wifi_QR_code_scanner.Managers
 
             if (result != null)
             {
+                ScanForQRcodes = false;
+
                 var torch = mediaCapture.VideoDeviceController.TorchControl;
 
                 if (torch.Supported) torch.Enabled = false;

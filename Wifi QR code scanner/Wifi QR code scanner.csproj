@@ -124,6 +124,7 @@
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Managers\MessageManager.cs" />
     <Compile Include="Managers\QRCameraManager.cs" />
     <Compile Include="Managers\WifiConnectionManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

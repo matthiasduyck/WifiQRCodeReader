@@ -61,11 +61,14 @@ namespace Wifi_QR_code_scanner
             var wifistringToConnectTo = command.Id as string;
             var wifiAPdata = WifiStringParser.parseWifiString(wifistringToConnectTo);
             this.wifiConnectionManager.ConnectToWifiNetwork(wifiAPdata);
+            //enable scanning again
+            this.cameraManager.ScanForQRcodes = true;
         }
 
         private void CancelHandler(IUICommand command)
         {
-            //todo: do something
+            //enable scanning again
+            this.cameraManager.ScanForQRcodes = true;
         }
 
         protected async override void OnNavigatedFrom(NavigationEventArgs e)
