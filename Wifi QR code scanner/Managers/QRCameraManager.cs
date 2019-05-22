@@ -1,31 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
 using Windows.UI.Core;
-using Windows.UI.Xaml.Navigation;
 using Windows.Media.Capture;
-using Windows.ApplicationModel;
 using System.Threading.Tasks;
 using Windows.System.Display;
 using Windows.Graphics.Display;
 using Windows.Storage.Streams;
 using Windows.Media.MediaProperties;
-using Windows.UI.Popups;
 using ZXing;
 using Windows.UI.Xaml.Media.Imaging;
-using Windows.Storage;
-using Windows.Graphics.Imaging;
 using System.Threading;
 
 namespace Wifi_QR_code_scanner.Managers
@@ -52,10 +35,8 @@ namespace Wifi_QR_code_scanner.Managers
         {
             try
             {
-
                 mediaCapture = new MediaCapture();
                 await mediaCapture.InitializeAsync();
-
 
                 displayRequest.RequestActive();
                 DisplayInformation.AutoRotationPreferences = DisplayOrientations.Landscape;
@@ -63,7 +44,7 @@ namespace Wifi_QR_code_scanner.Managers
             catch (UnauthorizedAccessException)
             {
                 // This will be thrown if the user denied access to the camera in privacy settings
-                //ShowMessageToUser("The app was denied access to the camera");
+                MessageManager.ShowMessageToUserAsync("The app was denied access to the camera");
                 return;
             }
 
@@ -88,10 +69,10 @@ namespace Wifi_QR_code_scanner.Managers
                 {
                     //try capture qr code here
 
-                    var interval = 500;
+                    var qrCaptureInterval = 500;
 
                     await findQRinImageAsync(imgCaptureWidth, imgCaptureHeight, imgProp, bcReader);
-                    await Task.Delay(interval, qrAnalyzerCancellationToken);
+                    await Task.Delay(qrCaptureInterval, qrAnalyzerCancellationToken);
                 }
             }
             catch (System.IO.FileLoadException)
@@ -103,7 +84,7 @@ namespace Wifi_QR_code_scanner.Managers
         {
             if (args.Status == MediaCaptureDeviceExclusiveControlStatus.SharedReadOnlyAvailable)
             {
-                //ShowMessageToUser("The camera preview can't be displayed because another app has exclusive access");
+                MessageManager.ShowMessageToUserAsync("The camera preview can't be displayed because another app has exclusive access");
             }
             else if (args.Status == MediaCaptureDeviceExclusiveControlStatus.ExclusiveControlAvailable && !isPreviewing)
             {
@@ -159,9 +140,6 @@ namespace Wifi_QR_code_scanner.Managers
                 qrCodeDecodedDelegate.Invoke(result.Text);
 
                 //await mediaCapture.StopPreviewAsync();
-                //var msgbox = new MessageDialog(result.Text);
-                //await msgbox.ShowAsync();
-
             }
         }
     }

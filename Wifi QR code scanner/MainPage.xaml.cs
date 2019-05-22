@@ -1,48 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
-using Windows.UI.Core;
-using Windows.UI.Xaml.Navigation;
-using Windows.Media.Capture;
 using Windows.ApplicationModel;
-using System.Threading.Tasks;
-using Windows.System.Display;
-using Windows.Graphics.Display;
-using Windows.Storage.Streams;
-using Windows.Media.MediaProperties;
 using Windows.UI.Popups;
-using ZXing;
-using Windows.UI.Xaml.Media.Imaging;
-using Windows.Storage;
-using Windows.Graphics.Imaging;
 using Wifi_QR_code_scanner.Managers;
 using Wifi_QR_code_scanner.Business;
-
-// The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
 namespace Wifi_QR_code_scanner
 {
     /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
+    /// Delegate to be triggered on QR capture
     /// </summary>
+    /// <param name="qrmessage"></param>
     public delegate void QrCodeDecodedDelegate(string qrmessage);
 
     public sealed partial class MainPage : Page
     {
-
         QRCameraManager cameraManager;
         WifiConnectionManager wifiConnectionManager;
+        
         
         public MainPage()
         {
@@ -50,11 +27,14 @@ namespace Wifi_QR_code_scanner
             QrCodeDecodedDelegate handler = new QrCodeDecodedDelegate(handleQRcodeFound);
             cameraManager = new QRCameraManager(PreviewControl, Dispatcher, handler);
             wifiConnectionManager = new WifiConnectionManager();
-            //Windows.Devices.WiFi.;
             Application.Current.Suspending += Application_Suspending;
             cameraManager.StartPreviewAsync();
         }
 
+        /// <summary>
+        /// Method to be triggered by delegate to display message to start connecting to a network
+        /// </summary>
+        /// <param name="qrmessage"></param>
         public async void handleQRcodeFound(string qrmessage)
         {
             var msgbox = new MessageDialog(qrmessage);
