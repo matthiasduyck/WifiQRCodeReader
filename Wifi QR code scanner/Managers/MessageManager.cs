@@ -1,4 +1,5 @@
 ﻿using System;
+using Wifi_QR_code_scanner.Business;
 using Windows.UI.Popups;
 
 namespace Wifi_QR_code_scanner.Managers

@@ -37,7 +37,9 @@ namespace Wifi_QR_code_scanner
         /// <param name="qrmessage"></param>
         public async void handleQRcodeFound(string qrmessage)
         {
-            var msgbox = new MessageDialog(qrmessage);
+            var wifiAPdata = WifiStringParser.parseWifiString(qrmessage);
+
+            var msgbox = new MessageDialog(wifiAPdata.ToString());
             // Add commands and set their callbacks; both buttons use the same callback function instead of inline event handlers
             msgbox.Commands.Add(new UICommand(
                 "Connect",
