@@ -38,12 +38,20 @@ namespace Wifi_QR_code_scanner
         public async void handleQRcodeFound(string qrmessage)
         {
             var wifiAPdata = WifiStringParser.parseWifiString(qrmessage);
-
-            var msgbox = new MessageDialog(wifiAPdata.ToString());
-            // Add commands and set their callbacks; both buttons use the same callback function instead of inline event handlers
-            msgbox.Commands.Add(new UICommand(
-                "Connect",
-                new UICommandInvokedHandler(this.ConnectHandler),qrmessage));
+            MessageDialog msgbox;
+            if (wifiAPdata == null)
+            {
+                msgbox = new MessageDialog("QR code does not contain WiFi connection data.");
+            }
+            else
+            {
+                msgbox = new MessageDialog(wifiAPdata.ToString());
+                // Add commands and set their callbacks; both buttons use the same callback function instead of inline event handlers
+                msgbox.Commands.Add(new UICommand(
+                    "Connect",
+                    new UICommandInvokedHandler(this.ConnectHandler), qrmessage));
+            }
+            
             msgbox.Commands.Add(new UICommand(
                 "Close",
                 new UICommandInvokedHandler(this.CancelHandler)));

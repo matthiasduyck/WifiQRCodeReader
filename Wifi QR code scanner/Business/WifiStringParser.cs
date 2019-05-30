@@ -11,9 +11,17 @@ namespace Wifi_QR_code_scanner.Business
         public static WifiAccessPointData parseWifiString(string wifiString)
         {
             var result = new WifiAccessPointData();
-            var splitWifiString = wifiString.Split(';');
-            result.ssid = splitWifiString[0].Split(':')[2];
-            result.password = splitWifiString[2].Split(':')[1];
+            try
+            {
+                var splitWifiString = wifiString.Split(';');
+                result.ssid = splitWifiString[0].Split(':')[2];
+                result.password = splitWifiString[2].Split(':')[1];
+            }
+            catch(Exception ex)
+            {
+                result = null;
+            }
+            
             
             return result;
         }
