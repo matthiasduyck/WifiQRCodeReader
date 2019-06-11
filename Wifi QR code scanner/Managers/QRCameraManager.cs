@@ -10,6 +10,7 @@ using Windows.Media.MediaProperties;
 using ZXing;
 using Windows.UI.Xaml.Media.Imaging;
 using System.Threading;
+using System.Diagnostics;
 
 namespace Wifi_QR_code_scanner.Managers
 {
@@ -66,7 +67,7 @@ namespace Wifi_QR_code_scanner.Managers
                 };
                 var bcReader = new BarcodeReader();
                 
-                while (!qrAnalyzerCancellationTokenSource.Token.IsCancellationRequested)
+                while (!qrAnalyzerCancellationTokenSource.IsCancellationRequested && qrAnalyzerCancellationTokenSource.Token!=null)
                 {
                     //try capture qr code here
                     if (ScanForQRcodes)
@@ -103,10 +104,12 @@ namespace Wifi_QR_code_scanner.Managers
         {
             if (mediaCapture != null)
             {
+                qrAnalyzerCancellationTokenSource.Dispose();
                 if (isPreviewing)
                 {
                     await mediaCapture.StopPreviewAsync();
                 }
+                isPreviewing = false;
 
                 await dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                 {
@@ -126,26 +129,31 @@ namespace Wifi_QR_code_scanner.Managers
         private async Task findQRinImageAsync(int imgCaptureWidth, int imgCaptureHeight, ImageEncodingProperties imgProp, BarcodeReader bcReader)
         {
             var stream = new InMemoryRandomAccessStream();
-            await mediaCapture.CapturePhotoToStreamAsync(imgProp, stream);
+            //When the camera is suspending, the stream can fail
+            try{
+                await mediaCapture.CapturePhotoToStreamAsync(imgProp, stream);
 
 
-            stream.Seek(0);
-            var wbm = new WriteableBitmap(imgCaptureWidth, imgCaptureHeight);
-            await wbm.SetSourceAsync(stream);
-            var result = bcReader.Decode(wbm);
+                stream.Seek(0);
+                var wbm = new WriteableBitmap(imgCaptureWidth, imgCaptureHeight);
+                await wbm.SetSourceAsync(stream);
+                var result = bcReader.Decode(wbm);
 
 
-            if (result != null)
+                if (result != null)
+                {
+                    ScanForQRcodes = false;
+
+                    var torch = mediaCapture.VideoDeviceController.TorchControl;
+
+                    if (torch.Supported) torch.Enabled = false;
+
+                    qrCodeDecodedDelegate.Invoke(result.Text);
+                }
+            }
+            catch (Exception ex)
             {
-                ScanForQRcodes = false;
-
-                var torch = mediaCapture.VideoDeviceController.TorchControl;
-
-                if (torch.Supported) torch.Enabled = false;
-
-                qrCodeDecodedDelegate.Invoke(result.Text);
-
-                //await mediaCapture.StopPreviewAsync();
+                Debug.WriteLine(ex);
             }
         }
     }

@@ -22,7 +22,6 @@ namespace Wifi_QR_code_scanner.Business
                 result = null;
             }
             
-            
             return result;
         }
     }

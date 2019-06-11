@@ -6,6 +6,7 @@ using Windows.ApplicationModel;
 using Windows.UI.Popups;
 using Wifi_QR_code_scanner.Managers;
 using Wifi_QR_code_scanner.Business;
+using System.Diagnostics;
 
 namespace Wifi_QR_code_scanner
 {
@@ -28,7 +29,21 @@ namespace Wifi_QR_code_scanner
             cameraManager = new QRCameraManager(PreviewControl, Dispatcher, handler);
             wifiConnectionManager = new WifiConnectionManager();
             Application.Current.Suspending += Application_Suspending;
+            Application.Current.Resuming += Current_Resuming;
+            Application.Current.LeavingBackground += Current_LeavingBackground;
+            //cameraManager.StartPreviewAsync();
+        }
+
+        private void Current_LeavingBackground(object sender, LeavingBackgroundEventArgs e)
+        {
+            Debug.WriteLine("leaving bg");
             cameraManager.StartPreviewAsync();
+        }
+
+        private void Current_Resuming(object sender, object e)
+        {
+            Debug.WriteLine("resuming");
+            var bla = true;
         }
 
         /// <summary>
@@ -83,10 +98,12 @@ namespace Wifi_QR_code_scanner
 
         protected async override void OnNavigatedFrom(NavigationEventArgs e)
         {
+            Debug.WriteLine("OnNavigatedFrom");
             await cameraManager.CleanupCameraAsync();
         }
         private async void Application_Suspending(object sender, SuspendingEventArgs e)
         {
+            Debug.WriteLine("Application Suspending");
             // Handle global application events only if this page is active
             if (Frame.CurrentSourcePageType == typeof(MainPage))
             {
