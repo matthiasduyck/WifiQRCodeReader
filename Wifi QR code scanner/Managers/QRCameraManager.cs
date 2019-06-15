@@ -23,6 +23,11 @@ namespace Wifi_QR_code_scanner.Managers
         CoreDispatcher dispatcher;
         CancellationTokenSource qrAnalyzerCancellationTokenSource;
         QrCodeDecodedDelegate qrCodeDecodedDelegate;
+        InMemoryRandomAccessStream inMemoryRandomAccessStream;
+        WriteableBitmap writeableBitmap;
+        Result bcResult;
+        static int imgCaptureWidth = 800;
+        static int imgCaptureHeight = 800;
 
         public bool ScanForQRcodes { get; set; }
 
@@ -33,6 +38,8 @@ namespace Wifi_QR_code_scanner.Managers
             this.qrCodeDecodedDelegate = qrCodeDecodedDelegate;
             var qrAnalyzerCancellationTokenSource = new CancellationTokenSource();
             this.qrAnalyzerCancellationTokenSource = qrAnalyzerCancellationTokenSource;
+            this.inMemoryRandomAccessStream = new InMemoryRandomAccessStream();
+            writeableBitmap = new WriteableBitmap(imgCaptureWidth, imgCaptureHeight);
         }
         public async Task StartPreviewAsync()
         {
@@ -57,8 +64,7 @@ namespace Wifi_QR_code_scanner.Managers
                 previewWindowElement.Source = mediaCapture;
                 await mediaCapture.StartPreviewAsync();
                 isPreviewing = true;
-                int imgCaptureWidth = 800;
-                int imgCaptureHeight = 800;
+                
                 var imgProp = new ImageEncodingProperties
                 {
                     Subtype = "BMP",
@@ -66,22 +72,26 @@ namespace Wifi_QR_code_scanner.Managers
                     Height = (uint)imgCaptureHeight
                 };
                 var bcReader = new BarcodeReader();
-                
-                while (!qrAnalyzerCancellationTokenSource.IsCancellationRequested && qrAnalyzerCancellationTokenSource.Token!=null)
+                var qrCaptureInterval = 200;
+                while (!qrAnalyzerCancellationTokenSource.IsCancellationRequested && qrAnalyzerCancellationTokenSource != null && qrAnalyzerCancellationTokenSource.Token!=null)
                 {
                     //try capture qr code here
                     if (ScanForQRcodes)
                     {
-                        await findQRinImageAsync(imgCaptureWidth, imgCaptureHeight, imgProp, bcReader);
+                        await findQRinImageAsync(imgProp, bcReader);
                     }
 
-                    var qrCaptureInterval = 500;
+
                     await Task.Delay(qrCaptureInterval, qrAnalyzerCancellationTokenSource.Token);
                 }
             }
             catch (System.IO.FileLoadException)
             {
                 mediaCapture.CaptureDeviceExclusiveControlStatusChanged += mediaCapture_CaptureDeviceExclusiveControlStatusChanged;
+            }
+            catch(System.ObjectDisposedException)
+            {
+                Debug.WriteLine("object was disposed");
             }
         }
 
@@ -126,21 +136,21 @@ namespace Wifi_QR_code_scanner.Managers
 
         }
 
-        private async Task findQRinImageAsync(int imgCaptureWidth, int imgCaptureHeight, ImageEncodingProperties imgProp, BarcodeReader bcReader)
+        private async Task findQRinImageAsync(ImageEncodingProperties imgProp, BarcodeReader bcReader)
         {
-            var stream = new InMemoryRandomAccessStream();
             //When the camera is suspending, the stream can fail
-            try{
-                await mediaCapture.CapturePhotoToStreamAsync(imgProp, stream);
+            try
+            {
+                await mediaCapture.CapturePhotoToStreamAsync(imgProp, inMemoryRandomAccessStream);
 
 
-                stream.Seek(0);
-                var wbm = new WriteableBitmap(imgCaptureWidth, imgCaptureHeight);
-                await wbm.SetSourceAsync(stream);
-                var result = bcReader.Decode(wbm);
+                inMemoryRandomAccessStream.Seek(0);
+                
+                await writeableBitmap.SetSourceAsync(inMemoryRandomAccessStream);
+                bcResult = bcReader.Decode(writeableBitmap);
 
 
-                if (result != null)
+                if (bcResult != null)
                 {
                     ScanForQRcodes = false;
 
@@ -148,7 +158,7 @@ namespace Wifi_QR_code_scanner.Managers
 
                     if (torch.Supported) torch.Enabled = false;
 
-                    qrCodeDecodedDelegate.Invoke(result.Text);
+                    qrCodeDecodedDelegate.Invoke(bcResult.Text);
                 }
             }
             catch (Exception ex)
