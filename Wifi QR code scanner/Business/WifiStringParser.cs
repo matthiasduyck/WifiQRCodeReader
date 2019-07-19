@@ -16,13 +16,12 @@ namespace Wifi_QR_code_scanner.Business
                 var splitWifiString = wifiString.Split(';');
                 result.ssid = splitWifiString[0].Split(':')[2];
                 result.password = splitWifiString[2].Split(':')[1];
+                return result;
             }
-            catch(Exception ex)
+            catch(Exception)
             {
-                result = null;
+                return null;
             }
-            
-            return result;
         }
     }
 }

@@ -7,6 +7,8 @@ using Windows.UI.Popups;
 using Wifi_QR_code_scanner.Managers;
 using Wifi_QR_code_scanner.Business;
 using System.Diagnostics;
+//using Wifi_QR_Code_Sanner_Library.Managers;
+//using Wifi_QR_Code_Sanner_Library.Domain;
 
 namespace Wifi_QR_code_scanner
 {
@@ -31,7 +33,6 @@ namespace Wifi_QR_code_scanner
             Application.Current.Suspending += Application_Suspending;
             Application.Current.Resuming += Current_Resuming;
             Application.Current.LeavingBackground += Current_LeavingBackground;
-            //cameraManager.StartPreviewAsync();
         }
 
         private void Current_LeavingBackground(object sender, LeavingBackgroundEventArgs e)

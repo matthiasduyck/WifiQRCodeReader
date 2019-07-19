@@ -11,6 +11,8 @@ using ZXing;
 using Windows.UI.Xaml.Media.Imaging;
 using System.Threading;
 using System.Diagnostics;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Wifi_QR_code_scanner.Managers
 {
@@ -47,7 +49,25 @@ namespace Wifi_QR_code_scanner.Managers
             {
                 mediaCapture = new MediaCapture();
                 await mediaCapture.InitializeAsync();
-
+                List<VideoEncodingProperties> availableResolutions = null;
+                try { 
+                    availableResolutions = mediaCapture.VideoDeviceController.GetAvailableMediaStreamProperties(MediaStreamType.VideoPreview).Where(properties=>properties is VideoEncodingProperties).Select(properties=>(VideoEncodingProperties)properties).ToList();
+                }
+                catch(Exception ex)
+                {
+                    MessageManager.ShowMessageToUserAsync("No resolutions could be detected, trying default mode.");
+                }
+                //var printout = availableResolutions.Where(x => x is VideoEncodingProperties).Select(y =>" H:" + ((VideoEncodingProperties)y).Height + " W:" + ((VideoEncodingProperties)y).Width + " fpsnum:" + ((VideoEncodingProperties)y).FrameRate.Numerator + " fpsdenom:" + ((VideoEncodingProperties)y).FrameRate.Denominator + " bitrate:" + ((VideoEncodingProperties)y).Bitrate);
+                VideoEncodingProperties bestVideoResolution = this.findBestResolution(availableResolutions);
+                VideoEncodingProperties bestPhotoResolution = this.findBestResolution(availableResolutions);
+                if (bestVideoResolution != null)
+                {
+                    await mediaCapture.VideoDeviceController.SetMediaStreamPropertiesAsync(MediaStreamType.VideoPreview, bestVideoResolution);
+                }
+                if (bestPhotoResolution != null)
+                {
+                    await mediaCapture.VideoDeviceController.SetMediaStreamPropertiesAsync(MediaStreamType.Photo, bestPhotoResolution);
+                }
                 displayRequest.RequestActive();
                 DisplayInformation.AutoRotationPreferences = DisplayOrientations.Landscape;
             }
@@ -63,8 +83,7 @@ namespace Wifi_QR_code_scanner.Managers
                 this.ScanForQRcodes = true;
                 previewWindowElement.Source = mediaCapture;
                 await mediaCapture.StartPreviewAsync();
-                isPreviewing = true;
-                
+                isPreviewing = true;             
                 var imgProp = new ImageEncodingProperties
                 {
                     Subtype = "BMP",
@@ -165,6 +184,22 @@ namespace Wifi_QR_code_scanner.Managers
             {
                 Debug.WriteLine(ex);
             }
+        }
+        private VideoEncodingProperties findBestResolution(List<VideoEncodingProperties> videoEncodingProperties)
+        {
+            if(videoEncodingProperties != null && videoEncodingProperties.Any())
+            {
+                //we want the highest bitrate, highest fps, with a resolution that is as square as possible, and not too small or too large
+                var result = videoEncodingProperties.Where(a => (a.Width >= a.Height))//square or wider
+                    .Where(b => b.Width >= 400 && b.Height >= 400)//not too small
+                    .Where(c => c.Width <= 800 && c.Height <= 600)//not too large
+                    .OrderBy(d => ((double)d.Width) / ((double)d.Height))//order by smallest aspect ratio(most 'square' possible)
+                    .ThenBy(e => e.Width)//order by the smallest possible width
+                    .ThenByDescending(f => f.Bitrate)//with the highest possible bitrate
+                    .First();
+                return result;
+            }
+            return null;
         }
     }
 }
