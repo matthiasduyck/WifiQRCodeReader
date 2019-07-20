@@ -72,6 +72,7 @@ namespace Wifi_QR_code_scanner.Business
             result = result.Replace(@"\;", @";");
             result = result.Replace(@"\,", @",");
             result = result.Replace(@"\:", @":");
+            result = result.Replace(@"\""",@"""");
             return result;
         }
     }

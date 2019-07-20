@@ -108,9 +108,13 @@ namespace Wifi_QR_code_scanner.Managers
             {
                 mediaCapture.CaptureDeviceExclusiveControlStatusChanged += mediaCapture_CaptureDeviceExclusiveControlStatusChanged;
             }
-            catch(System.ObjectDisposedException)
+            catch (System.ObjectDisposedException)
             {
                 Debug.WriteLine("object was disposed");
+            }
+            catch (Exception)
+            {
+                Debug.WriteLine("another exception occurred.");
             }
         }
 

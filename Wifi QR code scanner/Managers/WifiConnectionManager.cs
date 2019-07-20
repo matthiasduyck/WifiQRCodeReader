@@ -31,7 +31,15 @@ namespace Wifi_QR_code_scanner.Managers
                 }
                 if (qualifyingWifi != null)
                 {
-                    var connectResult = await firstWifiAdapter.ConnectAsync(qualifyingWifi, WiFiReconnectionKind.Automatic, new Windows.Security.Credentials.PasswordCredential() { Password = wifiAccessPointData.password });
+                    WiFiConnectionResult connectResult  = null;
+                    if (string.IsNullOrWhiteSpace(wifiAccessPointData.password) || wifiAccessPointData.wifiAccessPointSecurity.Equals(WifiAccessPointSecurity.nopass))
+                    {
+                        connectResult = await firstWifiAdapter.ConnectAsync(qualifyingWifi, WiFiReconnectionKind.Automatic);
+                    }
+                    else
+                    {
+                        connectResult = await firstWifiAdapter.ConnectAsync(qualifyingWifi, WiFiReconnectionKind.Automatic, new Windows.Security.Credentials.PasswordCredential() { Password = wifiAccessPointData.password });
+                    }
                     if (connectResult != null && connectResult.ConnectionStatus!=WiFiConnectionStatus.Success)
                     {
                         switch (connectResult.ConnectionStatus)
