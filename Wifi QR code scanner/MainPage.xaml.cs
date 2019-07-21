@@ -35,6 +35,22 @@ namespace Wifi_QR_code_scanner
             Application.Current.LeavingBackground += Current_LeavingBackground;
         }
 
+        public void ChangeAppStatus(AppStatus appStatus)
+        {
+            switch (appStatus)
+            {
+                case AppStatus.connectingToNetwork:
+                    this.Status.Text = "Connecting to network.";
+                    break;
+                case AppStatus.scanningForQR:
+                    this.Status.Text = "Looking for QR code.";
+                    break;
+                case AppStatus.waitingForUserInput:
+                    this.Status.Text = "Waiting for user input.";
+                    break;
+            }
+        }
+
         private void Current_LeavingBackground(object sender, LeavingBackgroundEventArgs e)
         {
             Debug.WriteLine("leaving bg");
@@ -44,7 +60,6 @@ namespace Wifi_QR_code_scanner
         private void Current_Resuming(object sender, object e)
         {
             Debug.WriteLine("resuming");
-            var bla = true;
         }
 
         /// <summary>
@@ -53,6 +68,7 @@ namespace Wifi_QR_code_scanner
         /// <param name="qrmessage"></param>
         public async void handleQRcodeFound(string qrmessage)
         {
+            ChangeAppStatus(AppStatus.waitingForUserInput);
             var wifiAPdata = WifiStringParser.parseWifiString(qrmessage);
             MessageDialog msgbox;
             if (wifiAPdata == null)
@@ -65,7 +81,7 @@ namespace Wifi_QR_code_scanner
                 // Add commands and set their callbacks; both buttons use the same callback function instead of inline event handlers
                 msgbox.Commands.Add(new UICommand(
                     "Connect",
-                    new UICommandInvokedHandler(this.ConnectHandler), qrmessage));
+                    new UICommandInvokedHandler(this.ConnectHandlerAsync), qrmessage));
             }
             
             msgbox.Commands.Add(new UICommand(
@@ -82,19 +98,22 @@ namespace Wifi_QR_code_scanner
             await msgbox.ShowAsync();
         }
 
-        private void ConnectHandler(IUICommand command)
+        private async void ConnectHandlerAsync(IUICommand command)
         {
+            ChangeAppStatus(AppStatus.connectingToNetwork);
             var wifistringToConnectTo = command.Id as string;
             var wifiAPdata = WifiStringParser.parseWifiString(wifistringToConnectTo);
-            this.wifiConnectionManager.ConnectToWifiNetwork(wifiAPdata);
+            await this.wifiConnectionManager.ConnectToWifiNetwork(wifiAPdata);
             //enable scanning again
             this.cameraManager.ScanForQRcodes = true;
+            ChangeAppStatus(AppStatus.scanningForQR);
         }
 
         private void CancelHandler(IUICommand command)
         {
             //enable scanning again
             this.cameraManager.ScanForQRcodes = true;
+            ChangeAppStatus(AppStatus.scanningForQR);
         }
 
         protected async override void OnNavigatedFrom(NavigationEventArgs e)

@@ -9,7 +9,7 @@
         
         public override string ToString()
         {
-            return "Network Name (SSID): " + ssid + System.Environment.NewLine +  "Password: " + password;
+            return "Network Name (SSID): " + ssid + System.Environment.NewLine +  "Password: " + password + System.Environment.NewLine + "Authentication: " + this.wifiAccessPointSecurity;
         }
     }
     public enum WifiAccessPointSecurity

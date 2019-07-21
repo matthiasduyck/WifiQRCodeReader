@@ -12,7 +12,7 @@ namespace Wifi_QR_code_scanner.Managers
 {
     public class WifiConnectionManager
     {
-        public async void ConnectToWifiNetwork(WifiAccessPointData wifiAccessPointData)
+        public async Task ConnectToWifiNetwork(WifiAccessPointData wifiAccessPointData)
         {
             //Windows.Devices.WiFi.WiFiAdapter.FindAllAdaptersAsync().;
             var result = await Windows.Devices.Enumeration.DeviceInformation.FindAllAsync(WiFiAdapter.GetDeviceSelector());
@@ -51,7 +51,7 @@ namespace Wifi_QR_code_scanner.Managers
                                 MessageManager.ShowMessageToUserAsync("Connection failed because an invalid credential was presented.");
                                 break;
                             case WiFiConnectionStatus.NetworkNotAvailable:
-                                MessageManager.ShowMessageToUserAsync("Connection failed because the network is not available.");
+                                MessageManager.ShowMessageToUserAsync("Connection failed because the network is not available. Try to move closer.");
                                 break;
                             case WiFiConnectionStatus.Timeout:
                                 MessageManager.ShowMessageToUserAsync("Connection failed because the connection attempt timed out.");

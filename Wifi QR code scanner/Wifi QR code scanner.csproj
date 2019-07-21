@@ -127,6 +127,7 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Business\AppStatus.cs" />
     <Compile Include="Business\WifiAccessPointData.cs" />
     <Compile Include="Business\WifiStringParser.cs" />
     <Compile Include="MainPage.xaml.cs">
