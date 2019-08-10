@@ -8,9 +8,44 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
+
+
     <Grid>
-        <CaptureElement Name="PreviewControl" Stretch="Uniform"/>
-        <TextBlock HorizontalAlignment="Center" Height="27" Margin="0,20,0,0" Text="Hold a WiFi QR code up to your camera to connect. Try to fill the screen with the code." TextWrapping="Wrap" VerticalAlignment="Top"/>
-        <TextBlock Name="Status" HorizontalAlignment="Center" Height="27" Margin="0,0,0,20" Text="Looking for QR code." TextWrapping="Wrap" VerticalAlignment="Bottom"/>
+        <Pivot x:Name="TabsView" SelectionChanged="TabsView_SelectionChanged">
+            <PivotItem Header="Scan QR Code">
+                <!--Pivot content goes here-->
+                <Grid>
+                    <CaptureElement Name="PreviewControl" Stretch="Uniform"/>
+                    <TextBlock HorizontalAlignment="Center" Height="27" Margin="0,20,0,0" Text="Hold a WiFi QR code up to your camera to connect. Try to fill the screen with the code." TextWrapping="Wrap" VerticalAlignment="Top"/>
+                    <TextBlock Name="Status" HorizontalAlignment="Center" Height="27" Margin="0,0,0,20" Text="Looking for QR code." TextWrapping="Wrap" VerticalAlignment="Bottom"/>
+                </Grid>
+            </PivotItem>
+            <PivotItem Header="Create QR Code">
+                <!--Pivot content goes here-->
+                <ScrollViewer VerticalScrollBarVisibility="Visible">
+                    <Grid Margin="20,20,20,20">
+
+                        <TextBlock VerticalAlignment="Top" Height="30" Text="WiFi Network Name"/>
+                        <TextBox Name="txtSSID" VerticalAlignment="Top" Height="32" Margin="0,30,0,0" PlaceholderText="MyWifiNetwork"></TextBox>
+                        <TextBlock VerticalAlignment="Top" Height="30" Margin="0,72,0,0" Text="Password"/>
+                        <TextBox Name="txtPass" VerticalAlignment="Top" Height="32" Margin="0,102,0,0" PlaceholderText="***************"></TextBox>
+                        <TextBlock VerticalAlignment="Top" Height="30" Margin="0,142,0,0" Text="Authentication Type"/>
+                        <ComboBox Name="cmbSecurity" SelectedIndex="0" Height="30" Margin="0,172,0,0" Width="168">
+                            <ComboBoxItem Name="WPA2">WPA2 (default)</ComboBoxItem>
+                            <ComboBoxItem Name="WPA">WPA</ComboBoxItem>
+                            <ComboBoxItem Name="WEP">WEP</ComboBoxItem>
+                            <ComboBoxItem Name="Open">None</ComboBoxItem>
+                        </ComboBox>
+
+                        <Button Name="btnGenerateQR" VerticalAlignment="Top" Height="30" Margin="0,212,0,0" Click="BtnGenerateQR_Click">Generate QR Code</Button>
+                        <Image Name="imgQrCode" VerticalAlignment="Top" Height="200" Margin="0,252,0,0"></Image>
+                        <Button Name="btnSaveFile" VerticalAlignment="Top" Height="30" Margin="0,470,0,0" Click="BtnSaveFile_Click">Save QR Code File</Button>
+                    </Grid>
+                </ScrollViewer>
+
+            </PivotItem>
+        </Pivot>
+
     </Grid>
+
 </Page>

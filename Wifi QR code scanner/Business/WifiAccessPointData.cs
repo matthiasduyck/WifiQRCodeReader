@@ -11,6 +11,23 @@
         {
             return "Network Name (SSID): " + ssid + System.Environment.NewLine +  "Password: " + password + System.Environment.NewLine + "Authentication: " + this.wifiAccessPointSecurity;
         }
+
+        public bool isvalid()
+        {
+            if (string.IsNullOrEmpty(ssid) || ssid.Length < 1 || ssid.Length > 32)
+            {
+                return false;
+            }
+            if (wifiAccessPointSecurity == WifiAccessPointSecurity.WPA && (ssid.Length<8 || ssid.Length>63))
+            {
+                return false;
+            }
+            if (string.IsNullOrEmpty(password) && wifiAccessPointSecurity!=WifiAccessPointSecurity.nopass)
+            {
+                return false;
+            }
+            return true;
+        }
     }
     public enum WifiAccessPointSecurity
     {

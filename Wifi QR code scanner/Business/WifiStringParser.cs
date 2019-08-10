@@ -65,6 +65,31 @@ namespace Wifi_QR_code_scanner.Business
             }
         }
 
+        public static string createWifiString(WifiAccessPointData wifiAccessPointData)
+        {
+            var result = "WIFI:";
+            switch (wifiAccessPointData.wifiAccessPointSecurity)
+            {
+                case WifiAccessPointSecurity.WEP:
+                    result += "T:WEP;";
+                    break;
+                case WifiAccessPointSecurity.WPA:
+                    result += "T:WPA;";
+                    break;
+            }
+
+            result += "S:" + escapeSpecialChars(wifiAccessPointData.ssid)+";";
+
+            if (!string.IsNullOrEmpty(wifiAccessPointData.password))
+            {
+                result += "P:" + escapeSpecialChars(wifiAccessPointData.password)+";";
+            }
+
+            result += ";";
+
+            return result;
+        }
+
         private static string unescapeSpecialChars(string input)
         {
             var result = input;
@@ -72,7 +97,18 @@ namespace Wifi_QR_code_scanner.Business
             result = result.Replace(@"\;", @";");
             result = result.Replace(@"\,", @",");
             result = result.Replace(@"\:", @":");
-            result = result.Replace(@"\""",@"""");
+            result = result.Replace(@"\""", @"""");
+            return result;
+        }
+
+        private static string escapeSpecialChars(string input)
+        {
+            var result = input;
+            result = result.Replace(@"\", @"\\");
+            result = result.Replace(@";", @"\;");
+            result = result.Replace(@",", @"\,");
+            result = result.Replace(@":", @"\:");
+            result = result.Replace(@"""", @"\""");
             return result;
         }
     }

@@ -7,6 +7,15 @@ using Windows.UI.Popups;
 using Wifi_QR_code_scanner.Managers;
 using Wifi_QR_code_scanner.Business;
 using System.Diagnostics;
+using ZXing.QrCode;
+using System.Collections.Generic;
+using Windows.Storage.Pickers;
+using Windows.Storage;
+using Windows.UI.Xaml.Media.Imaging;
+using Windows.Storage.Streams;
+using Windows.Graphics.Imaging;
+using System.Runtime.InteropServices.WindowsRuntime;
+using Windows.ApplicationModel.DataTransfer;
 //using Wifi_QR_Code_Sanner_Library.Managers;
 //using Wifi_QR_Code_Sanner_Library.Domain;
 
@@ -22,8 +31,10 @@ namespace Wifi_QR_code_scanner
     {
         QRCameraManager cameraManager;
         WifiConnectionManager wifiConnectionManager;
-        
-        
+
+        private int activeTab = 0;
+
+
         public MainPage()
         {
             this.InitializeComponent();
@@ -82,6 +93,9 @@ namespace Wifi_QR_code_scanner
                 msgbox.Commands.Add(new UICommand(
                     "Connect",
                     new UICommandInvokedHandler(this.ConnectHandlerAsync), qrmessage));
+                msgbox.Commands.Add(new UICommand(
+                    "Copy Password",
+                    new UICommandInvokedHandler(this.CopyPasswordToClipboardHandlerAsync), qrmessage));
             }
             
             msgbox.Commands.Add(new UICommand(
@@ -96,6 +110,19 @@ namespace Wifi_QR_code_scanner
 
             // Show the message dialog
             await msgbox.ShowAsync();
+        }
+
+        private async void CopyPasswordToClipboardHandlerAsync(IUICommand command)
+        {
+            ChangeAppStatus(AppStatus.waitingForUserInput);
+            var wifistringToConnectTo = command.Id as string;
+            var wifiAPdata = WifiStringParser.parseWifiString(wifistringToConnectTo);
+            var dataPackage = new DataPackage();
+            dataPackage.SetText(wifiAPdata.password);
+            Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(dataPackage);
+            //enable scanning again
+            this.cameraManager.ScanForQRcodes = true;
+            ChangeAppStatus(AppStatus.scanningForQR);
         }
 
         private async void ConnectHandlerAsync(IUICommand command)
@@ -130,6 +157,106 @@ namespace Wifi_QR_code_scanner
                 var deferral = e.SuspendingOperation.GetDeferral();
                 await cameraManager.CleanupCameraAsync();
                 deferral.Complete();
+            }
+        }
+
+        private void TabsView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            activeTab = this.TabsView.SelectedIndex;
+            if (activeTab == 0)
+            {
+                this.cameraManager.ScanForQRcodes = true;
+                ChangeAppStatus(AppStatus.scanningForQR);
+            }
+            else
+            {
+                this.cameraManager.ScanForQRcodes = false;
+                ChangeAppStatus(AppStatus.waitingForUserInput);
+            }
+        }
+
+        private void BtnGenerateQR_Click(object sender, RoutedEventArgs e)
+        {
+            //grab values
+            var ssid = this.txtSSID.Text;
+            var password = this.txtPass.Text;
+            var security = ((ComboBoxItem)cmbSecurity.SelectedItem).Content.ToString();
+            //verify they are filled in
+            if (string.IsNullOrEmpty(ssid))
+            {
+                MessageManager.ShowMessageToUserAsync("Wifi Network Name empty.");
+                return;
+            }
+
+            var wifiData = new WifiAccessPointData();
+            wifiData.password = password;
+            wifiData.ssid = ssid;
+            if (security == "WEP")
+            {
+                wifiData.wifiAccessPointSecurity = WifiAccessPointSecurity.WEP;
+            }
+            else if (security == "WPA" || security== "WPA2 (default)")
+            {
+                wifiData.wifiAccessPointSecurity = WifiAccessPointSecurity.WPA;
+            }
+            else if (security=="None")
+            {
+                wifiData.wifiAccessPointSecurity = WifiAccessPointSecurity.nopass;
+            }
+
+            //verify they are valid
+            if (!wifiData.isvalid())
+            {
+                MessageManager.ShowMessageToUserAsync("Wifi data not valid, please verify all fields.");
+                return;
+            }
+
+            var wifiQrString = WifiStringParser.createWifiString(wifiData);
+
+            //create image
+            var options = new QrCodeEncodingOptions
+            {
+                DisableECI = true,
+                CharacterSet = "UTF-8",
+                Width = 512,
+                Height = 512,
+            };
+            var qr = new ZXing.BarcodeWriter();
+            qr.Options = options;
+            qr.Format = ZXing.BarcodeFormat.QR_CODE;
+            var result = qr.Write(wifiQrString);
+            //set as source
+            this.imgQrCode.Source = result;
+        }
+
+        private async void BtnSaveFile_Click(object sender, RoutedEventArgs e)
+        {
+            var _bitmap = new RenderTargetBitmap();
+            await _bitmap.RenderAsync(this.imgQrCode);    //-----> This is my ImageControl.
+
+            var savePicker = new FileSavePicker();
+            savePicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
+            savePicker.FileTypeChoices.Add("Image", new List<string>() { ".jpg" });
+            savePicker.SuggestedFileName = "QRCodeImage" + DateTime.Now.ToString("yyyyMMddhhmmss"); //todo add ssid name
+            StorageFile savefile = await savePicker.PickSaveFileAsync();
+            if (savefile == null)
+                return;
+
+            var pixels = await _bitmap.GetPixelsAsync();
+            using (IRandomAccessStream stream = await savefile.OpenAsync(FileAccessMode.ReadWrite))
+            {
+                var encoder = await
+                BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, stream);
+                byte[] bytes = pixels.ToArray();
+                encoder.SetPixelData(BitmapPixelFormat.Bgra8,
+                                        BitmapAlphaMode.Ignore,
+                                        (uint)_bitmap.PixelWidth,
+                                    (uint)_bitmap.PixelHeight,
+                                        200,
+                                        200,
+                                        bytes);
+
+                await encoder.FlushAsync();
             }
         }
     }
