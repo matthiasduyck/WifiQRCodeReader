@@ -15,9 +15,11 @@
             <PivotItem Header="Scan QR Code">
                 <!--Pivot content goes here-->
                 <Grid>
-                    <CaptureElement Name="PreviewControl" Stretch="Uniform"/>
+                    <CaptureElement Name="PreviewControl" Stretch="Uniform" Margin="0,0,0,40"/>
                     <TextBlock HorizontalAlignment="Center" Height="27" Margin="0,20,0,0" Text="Hold a WiFi QR code up to your camera to connect. Try to fill the screen with the code." TextWrapping="Wrap" VerticalAlignment="Top"/>
-                    <TextBlock Name="Status" HorizontalAlignment="Center" Height="27" Margin="0,0,0,20" Text="Looking for QR code." TextWrapping="Wrap" VerticalAlignment="Bottom"/>
+                    <TextBlock Name="Status" HorizontalAlignment="Center" Height="27" Margin="0,0,0,5" Text="Looking for QR code." TextWrapping="Wrap" VerticalAlignment="Bottom"/>
+                    <ComboBox SelectionChanged="CmbCameraSelect_SelectionChanged" Name="cmbCameraSelect" SelectedIndex="0" Height="30" Margin="0,0,0,5" Width="168" VerticalAlignment="Bottom">
+                    </ComboBox>
                 </Grid>
             </PivotItem>
             <PivotItem Header="Create QR Code">

@@ -13,6 +13,9 @@ using System.Threading;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
+using Windows.Devices.Enumeration;
+using System.Collections.ObjectModel;
+using Wifi_QR_code_scanner.Business;
 
 namespace Wifi_QR_code_scanner.Managers
 {
@@ -43,12 +46,30 @@ namespace Wifi_QR_code_scanner.Managers
             this.inMemoryRandomAccessStream = new InMemoryRandomAccessStream();
             writeableBitmap = new WriteableBitmap(imgCaptureWidth, imgCaptureHeight);
         }
-        public async Task StartPreviewAsync()
+
+        public async Task EnumerateCameras(ComboBox comboBox)
+        {
+            var Videodevices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
+
+            ObservableCollection<DeviceInformation> cameras = new ObservableCollection<DeviceInformation>();
+            foreach(var camera in Videodevices)
+            {
+                comboBox.Items.Add(new ComboboxItem(camera.Name,camera.Id));
+            }
+            
+        }
+        public async Task StartPreviewAsync(ComboboxItem comboboxItem)
         {
             try
             {
                 mediaCapture = new MediaCapture();
-                await mediaCapture.InitializeAsync();
+                var settings = new MediaCaptureInitializationSettings();
+                qrAnalyzerCancellationTokenSource = new CancellationTokenSource();
+                if (comboboxItem != null)
+                {
+                    settings.VideoDeviceId = comboboxItem.ID;
+                }
+                await mediaCapture.InitializeAsync(settings);
                 List<VideoEncodingProperties> availableResolutions = null;
                 try { 
                     availableResolutions = mediaCapture.VideoDeviceController.GetAvailableMediaStreamProperties(MediaStreamType.VideoPreview).Where(properties=>properties is VideoEncodingProperties).Select(properties=>(VideoEncodingProperties)properties).ToList();
@@ -69,7 +90,6 @@ namespace Wifi_QR_code_scanner.Managers
                     await mediaCapture.VideoDeviceController.SetMediaStreamPropertiesAsync(MediaStreamType.Photo, bestPhotoResolution);
                 }
                 displayRequest.RequestActive();
-                DisplayInformation.AutoRotationPreferences = DisplayOrientations.Landscape;
             }
             catch (UnauthorizedAccessException)
             {
@@ -128,7 +148,7 @@ namespace Wifi_QR_code_scanner.Managers
             {
                 await dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
                 {
-                    await StartPreviewAsync();
+                    await StartPreviewAsync(null);
                 });
             }
         }

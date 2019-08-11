@@ -16,6 +16,7 @@ using Windows.Storage.Streams;
 using Windows.Graphics.Imaging;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.Devices.Enumeration;
 //using Wifi_QR_Code_Sanner_Library.Managers;
 //using Wifi_QR_Code_Sanner_Library.Domain;
 
@@ -34,7 +35,7 @@ namespace Wifi_QR_code_scanner
 
         private int activeTab = 0;
 
-
+        int temp = 0;
         public MainPage()
         {
             this.InitializeComponent();
@@ -44,6 +45,7 @@ namespace Wifi_QR_code_scanner
             Application.Current.Suspending += Application_Suspending;
             Application.Current.Resuming += Current_Resuming;
             Application.Current.LeavingBackground += Current_LeavingBackground;
+            cameraManager.EnumerateCameras(cmbCameraSelect);
         }
 
         public void ChangeAppStatus(AppStatus appStatus)
@@ -65,7 +67,7 @@ namespace Wifi_QR_code_scanner
         private void Current_LeavingBackground(object sender, LeavingBackgroundEventArgs e)
         {
             Debug.WriteLine("leaving bg");
-            cameraManager.StartPreviewAsync();
+            cameraManager.StartPreviewAsync(null);
         }
 
         private void Current_Resuming(object sender, object e)
@@ -257,6 +259,24 @@ namespace Wifi_QR_code_scanner
                                         bytes);
 
                 await encoder.FlushAsync();
+            }
+        }
+
+        private async void CmbCameraSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+            var selected = cmbCameraSelect.SelectedItem;
+            temp++;
+            if (cameraManager != null && cameraManager.ScanForQRcodes == true && selected is ComboboxItem && temp > 1)
+            {
+                
+                //stop cam
+                cameraManager.ScanForQRcodes = false;
+                await cameraManager.CleanupCameraAsync();
+
+                var selectedCamera = ((ComboboxItem)cmbCameraSelect.SelectedItem);
+                //start cam again
+                await cameraManager.StartPreviewAsync(selectedCamera);
             }
         }
     }
