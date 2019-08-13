@@ -16,6 +16,7 @@ using System.Linq;
 using Windows.Devices.Enumeration;
 using System.Collections.ObjectModel;
 using Wifi_QR_code_scanner.Business;
+using Windows.Media.Capture.Frames;
 
 namespace Wifi_QR_code_scanner.Managers
 {
@@ -34,6 +35,8 @@ namespace Wifi_QR_code_scanner.Managers
         static int imgCaptureWidth = 800;
         static int imgCaptureHeight = 800;
 
+        private IEnumerable<DeviceInformation> availableColorCameras;
+
         public bool ScanForQRcodes { get; set; }
 
         public QRCameraManager(CaptureElement previewWindowElement, CoreDispatcher dispatcher, QrCodeDecodedDelegate qrCodeDecodedDelegate)
@@ -49,27 +52,72 @@ namespace Wifi_QR_code_scanner.Managers
 
         public async Task EnumerateCameras(ComboBox comboBox)
         {
-            var Videodevices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
-
-            ObservableCollection<DeviceInformation> cameras = new ObservableCollection<DeviceInformation>();
-            foreach(var camera in Videodevices)
+            //var Videodevices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
+            var Videodevices = await GetFrameSourceGroupsAsync();
+            foreach (var camera in Videodevices)
             {
                 comboBox.Items.Add(new ComboboxItem(camera.Name,camera.Id));
             }
             
         }
+
+        public async Task<IEnumerable<DeviceInformation>> GetFrameSourceGroupsAsync()
+        {
+            if (availableColorCameras == null)
+            {
+                try
+                {
+                    var videoDevices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
+                    var groups = await MediaFrameSourceGroup.FindAllAsync();
+
+                    // Filter out color video preview and video record type sources and remove duplicates video devices.
+                    var _frameSourceGroups = groups.Where(g => g.SourceInfos.Any(s => s.SourceKind == MediaFrameSourceKind.Color &&
+                                                                                (s.MediaStreamType == MediaStreamType.VideoPreview || s.MediaStreamType == MediaStreamType.VideoRecord))
+                                                                                && g.SourceInfos.All(sourceInfo => videoDevices.Any(vd => vd.Id == sourceInfo.DeviceInformation.Id))).ToList();
+                    availableColorCameras = _frameSourceGroups.SelectMany(x => x.SourceInfos.Select(y => y.DeviceInformation));
+                }
+                catch (Exception ex)
+                {
+                    MessageManager.ShowMessageToUserAsync("Tried to find all available color cameras but failed to do so.");
+                }
+            }
+
+            return availableColorCameras;
+        }
+
         public async Task StartPreviewAsync(ComboboxItem comboboxItem)
         {
             try
             {
                 mediaCapture = new MediaCapture();
-                var settings = new MediaCaptureInitializationSettings();
-                qrAnalyzerCancellationTokenSource = new CancellationTokenSource();
+
+                
+                var settings = new MediaCaptureInitializationSettings()
+                {
+                    StreamingCaptureMode = StreamingCaptureMode.Video
+                };
                 if (comboboxItem != null)
                 {
                     settings.VideoDeviceId = comboboxItem.ID;
                 }
-                await mediaCapture.InitializeAsync(settings);
+                else
+                {
+                    if (availableColorCameras == null)
+                    {
+                        availableColorCameras = await GetFrameSourceGroupsAsync();
+                    }
+                    settings.VideoDeviceId = availableColorCameras.First().Id;
+                }
+                
+                qrAnalyzerCancellationTokenSource = new CancellationTokenSource();
+                try
+                {
+                    await mediaCapture.InitializeAsync(settings);
+                }
+                catch (Exception ex)
+                {
+                    MessageManager.ShowMessageToUserAsync("Tried to initialize a color camera but failed to do so.");
+                }
                 List<VideoEncodingProperties> availableResolutions = null;
                 try { 
                     availableResolutions = mediaCapture.VideoDeviceController.GetAvailableMediaStreamProperties(MediaStreamType.VideoPreview).Where(properties=>properties is VideoEncodingProperties).Select(properties=>(VideoEncodingProperties)properties).ToList();

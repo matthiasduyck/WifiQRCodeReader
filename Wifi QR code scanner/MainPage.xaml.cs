@@ -35,7 +35,6 @@ namespace Wifi_QR_code_scanner
 
         private int activeTab = 0;
 
-        int temp = 0;
         public MainPage()
         {
             this.InitializeComponent();
@@ -266,8 +265,7 @@ namespace Wifi_QR_code_scanner
         {
 
             var selected = cmbCameraSelect.SelectedItem;
-            temp++;
-            if (cameraManager != null && cameraManager.ScanForQRcodes == true && selected is ComboboxItem && temp > 1)
+            if (cameraManager != null && cameraManager.ScanForQRcodes == true && selected is ComboboxItem)
             {
                 
                 //stop cam
