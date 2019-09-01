@@ -74,7 +74,7 @@ namespace Wifi_QR_code_scanner.Managers
                     var _frameSourceGroups = groups.Where(g => g.SourceInfos.Any(s => s.SourceKind == MediaFrameSourceKind.Color &&
                                                                                 (s.MediaStreamType == MediaStreamType.VideoPreview || s.MediaStreamType == MediaStreamType.VideoRecord))
                                                                                 && g.SourceInfos.All(sourceInfo => videoDevices.Any(vd => vd.Id == sourceInfo.DeviceInformation.Id))).ToList();
-                    availableColorCameras = _frameSourceGroups.SelectMany(x => x.SourceInfos.Select(y => y.DeviceInformation));
+                    availableColorCameras = _frameSourceGroups.SelectMany(x => x.SourceInfos.Select(y => y.DeviceInformation)).Distinct();
                 }
                 catch (Exception ex)
                 {
@@ -128,15 +128,15 @@ namespace Wifi_QR_code_scanner.Managers
                 }
                 //var printout = availableResolutions.Where(x => x is VideoEncodingProperties).Select(y =>" H:" + ((VideoEncodingProperties)y).Height + " W:" + ((VideoEncodingProperties)y).Width + " fpsnum:" + ((VideoEncodingProperties)y).FrameRate.Numerator + " fpsdenom:" + ((VideoEncodingProperties)y).FrameRate.Denominator + " bitrate:" + ((VideoEncodingProperties)y).Bitrate);
                 VideoEncodingProperties bestVideoResolution = this.findBestResolution(availableResolutions);
-                VideoEncodingProperties bestPhotoResolution = this.findBestResolution(availableResolutions);
+                //VideoEncodingProperties bestPhotoResolution = this.findBestResolution(availableResolutions);
                 if (bestVideoResolution != null)
                 {
                     await mediaCapture.VideoDeviceController.SetMediaStreamPropertiesAsync(MediaStreamType.VideoPreview, bestVideoResolution);
                 }
-                if (bestPhotoResolution != null)
-                {
-                    await mediaCapture.VideoDeviceController.SetMediaStreamPropertiesAsync(MediaStreamType.Photo, bestPhotoResolution);
-                }
+                //if (bestPhotoResolution != null)
+                //{
+                //    await mediaCapture.VideoDeviceController.SetMediaStreamPropertiesAsync(MediaStreamType.Photo, bestPhotoResolution);
+                //}
                 displayRequest.RequestActive();
             }
             catch (UnauthorizedAccessException)
