@@ -55,7 +55,6 @@ namespace Wifi_QR_code_scanner.Managers
 
         public async Task EnumerateCameras(ComboBox comboBox)
         {
-            //var Videodevices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
             var frameSourceInformation = await GetFrameSourceInformationAsync();
             var videodevices = await GetFrameSourceGroupsAsync(frameSourceInformation);
             foreach (var camera in videodevices)
@@ -150,17 +149,14 @@ namespace Wifi_QR_code_scanner.Managers
                 {
                     MessageManager.ShowMessageToUserAsync("No resolutions could be detected, trying default mode.");
                 }
-                //var printout = availableResolutions.Where(x => x is VideoEncodingProperties).Select(y =>" H:" + ((VideoEncodingProperties)y).Height + " W:" + ((VideoEncodingProperties)y).Width + " fpsnum:" + ((VideoEncodingProperties)y).FrameRate.Numerator + " fpsdenom:" + ((VideoEncodingProperties)y).FrameRate.Denominator + " bitrate:" + ((VideoEncodingProperties)y).Bitrate);
+
                 VideoEncodingProperties bestVideoResolution = this.findBestResolution(availableResolutions);
-                //VideoEncodingProperties bestPhotoResolution = this.findBestResolution(availableResolutions);
+
                 if (bestVideoResolution != null)
                 {
                     await mediaCapture.VideoDeviceController.SetMediaStreamPropertiesAsync(MediaStreamType.VideoPreview, bestVideoResolution);
                 }
-                //if (bestPhotoResolution != null)
-                //{
-                //    await mediaCapture.VideoDeviceController.SetMediaStreamPropertiesAsync(MediaStreamType.Photo, bestPhotoResolution);
-                //}
+
                 displayRequest.RequestActive();
             }
             catch (UnauthorizedAccessException)
@@ -175,12 +171,6 @@ namespace Wifi_QR_code_scanner.Managers
                 this.ScanForQRcodes = true;
                 previewWindowElement.Source = mediaCapture;
                 await mediaCapture.StartPreviewAsync();
-
-                //framereader setup for processing frames
-                //MediaFrameReader mediaFrameReader;
-                //mediaFrameReader = await mediaCapture.CreateFrameReaderAsync(mediaCapture.FrameSources[frameSourceInformation.MediaFrameSourceInfo.Id], MediaEncodingSubtypes.Argb32);
-                //mediaFrameReader.FrameArrived += ColorFrameReader_FrameArrivedAsync;
-                //await mediaFrameReader.StartAsync();
 
                 isPreviewing = true;             
                 var imgProp = new ImageEncodingProperties
@@ -207,21 +197,16 @@ namespace Wifi_QR_code_scanner.Managers
                 // Get information about the preview
                 var previewProperties = mediaCapture.VideoDeviceController.GetMediaStreamProperties(MediaStreamType.VideoPreview) as VideoEncodingProperties;
 
-                // Create a video frame in the desired format for the preview frame
-                //VideoFrame videoFrameFormatPlaceholder = new VideoFrame(BitmapPixelFormat.Bgra8, (int)previewProperties.Width, (int)previewProperties.Height);
-
                 while (!qrAnalyzerCancellationTokenSource.IsCancellationRequested && qrAnalyzerCancellationTokenSource != null && qrAnalyzerCancellationTokenSource.Token!=null)
                 {
                     //try capture qr code here
                     if (ScanForQRcodes)
                     {
-                        //previewFrame = null;
                         VideoFrame videoFrameFormatPlaceholder = new VideoFrame(BitmapPixelFormat.Bgra8, (int)previewProperties.Width, (int)previewProperties.Height);
-                            await mediaCapture.GetPreviewFrameAsync(videoFrameFormatPlaceholder);
-                            //videoFrameFormatPlaceholder = null;
-                            await findQRinImageAsync(bcReader, videoFrameFormatPlaceholder);
-                            videoFrameFormatPlaceholder.Dispose();
-                            videoFrameFormatPlaceholder = null;
+                        await mediaCapture.GetPreviewFrameAsync(videoFrameFormatPlaceholder);
+                        await findQRinImageAsync(bcReader, videoFrameFormatPlaceholder);
+                        videoFrameFormatPlaceholder.Dispose();
+                        videoFrameFormatPlaceholder = null;
                     }
 
                     await Task.Delay(qrCaptureInterval, qrAnalyzerCancellationTokenSource.Token);
@@ -239,20 +224,6 @@ namespace Wifi_QR_code_scanner.Managers
             {
                 Debug.WriteLine("another exception occurred.");
             }
-        }
-
-
-        private void ColorFrameReader_FrameArrivedAsync(MediaFrameReader sender, MediaFrameArrivedEventArgs args)
-        {
-            var mediaFrameReference = sender.TryAcquireLatestFrame();
-            var videoMediaFrame = mediaFrameReference?.VideoMediaFrame;
-
-            //if (videoMediaFrame != null)
-            //{
-            //    findQRinImageAsync(bcReader, videoMediaFrame.SoftwareBitmap);
-            //}
-
-            mediaFrameReference.Dispose();
         }
 
         private async void mediaCapture_CaptureDeviceExclusiveControlStatusChanged(MediaCapture sender, MediaCaptureDeviceExclusiveControlStatusChangedEventArgs args)
@@ -293,7 +264,6 @@ namespace Wifi_QR_code_scanner.Managers
                     mediaCapture = null;
                 });
             }
-
         }
 
         private async Task findQRinImageAsync(BarcodeReader bcReader, VideoFrame previeFrame)
@@ -316,25 +286,6 @@ namespace Wifi_QR_code_scanner.Managers
             }
         }
 
-        private async Task findQRinImageAsync(BarcodeReader bcReader, SoftwareBitmap softwareBitmap)
-        {
-            //When the camera is suspending, the stream can fail
-            try
-            {
-                bcResult = bcReader.Decode(softwareBitmap);
-
-                if (bcResult != null)
-                {
-                    ScanForQRcodes = false;
-
-                    qrCodeDecodedDelegate.Invoke(bcResult.Text);
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
-            }
-        }
         private VideoEncodingProperties findBestResolution(List<VideoEncodingProperties> videoEncodingProperties)
         {
             if(videoEncodingProperties != null && videoEncodingProperties.Any())
