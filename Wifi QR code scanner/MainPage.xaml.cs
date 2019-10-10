@@ -89,7 +89,7 @@ namespace Wifi_QR_code_scanner
             }
             else
             {
-                msgbox = new MessageDialog(wifiAPdata.ToString());
+                msgbox = new MessageDialog(wifiAPdata.ToObfuscatedString());
                 // Add commands and set their callbacks; both buttons use the same callback function instead of inline event handlers
                 msgbox.Commands.Add(new UICommand(
                     "Connect",
@@ -110,6 +110,13 @@ namespace Wifi_QR_code_scanner
             msgbox.CancelCommandIndex = 1;
 
             // Show the message dialog
+            await msgbox.ShowAsync();
+        }
+
+        private async void ShowPasswordHandlerAsync(IUICommand command)
+        {
+            var wifiPassword = command.Id as string;
+            MessageDialog msgbox = new MessageDialog(wifiPassword);
             await msgbox.ShowAsync();
         }
 
@@ -270,8 +277,14 @@ namespace Wifi_QR_code_scanner
                 
                 //stop cam
                 cameraManager.ScanForQRcodes = false;
-                await cameraManager.CleanupCameraAsync();
-
+                try
+                {
+                    await cameraManager.CleanupCameraAsync();
+                }
+                catch (Exception)
+                {
+                    //todo, investigate why this fails sometimes
+                }
                 var selectedCamera = ((ComboboxItem)cmbCameraSelect.SelectedItem);
                 //start cam again
                 await cameraManager.StartPreviewAsync(selectedCamera);

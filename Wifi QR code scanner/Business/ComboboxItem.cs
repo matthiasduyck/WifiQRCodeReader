@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Media.Capture.Frames;
 
 namespace Wifi_QR_code_scanner.Business
 {
@@ -10,9 +11,10 @@ namespace Wifi_QR_code_scanner.Business
     {
         public string Name;
         public string ID;
-        public ComboboxItem(string name, string id)
+        public FrameSourceInformation MediaFrameSourceInformation;
+        public ComboboxItem(string name, string id, FrameSourceInformation mediaFrameSourceInformation)
         {
-            Name = name; ID = id;
+            Name = name; ID = id; MediaFrameSourceInformation = mediaFrameSourceInformation;
         }
         public override string ToString()
         {

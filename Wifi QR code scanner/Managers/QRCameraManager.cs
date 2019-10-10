@@ -17,6 +17,8 @@ using Windows.Devices.Enumeration;
 using System.Collections.ObjectModel;
 using Wifi_QR_code_scanner.Business;
 using Windows.Media.Capture.Frames;
+using Windows.Media;
+using Windows.Graphics.Imaging;
 
 namespace Wifi_QR_code_scanner.Managers
 {
@@ -32,6 +34,7 @@ namespace Wifi_QR_code_scanner.Managers
         InMemoryRandomAccessStream inMemoryRandomAccessStream;
         WriteableBitmap writeableBitmap;
         Result bcResult;
+        BarcodeReader bcReader = new BarcodeReader();
         static int imgCaptureWidth = 800;
         static int imgCaptureHeight = 800;
 
@@ -53,28 +56,22 @@ namespace Wifi_QR_code_scanner.Managers
         public async Task EnumerateCameras(ComboBox comboBox)
         {
             //var Videodevices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
-            var Videodevices = await GetFrameSourceGroupsAsync();
-            foreach (var camera in Videodevices)
+            var frameSourceInformation = await GetFrameSourceInformationAsync();
+            var videodevices = await GetFrameSourceGroupsAsync(frameSourceInformation);
+            foreach (var camera in videodevices)
             {
-                comboBox.Items.Add(new ComboboxItem(camera.Name,camera.Id));
+                comboBox.Items.Add(new ComboboxItem(camera.Name,camera.Id,frameSourceInformation));
             }
             
         }
 
-        public async Task<IEnumerable<DeviceInformation>> GetFrameSourceGroupsAsync()
+        public async Task<IEnumerable<DeviceInformation>> GetFrameSourceGroupsAsync(FrameSourceInformation frameSourceInformation)
         {
             if (availableColorCameras == null)
             {
                 try
                 {
-                    var videoDevices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
-                    var groups = await MediaFrameSourceGroup.FindAllAsync();
-
-                    // Filter out color video preview and video record type sources and remove duplicates video devices.
-                    var _frameSourceGroups = groups.Where(g => g.SourceInfos.Any(s => s.SourceKind == MediaFrameSourceKind.Color &&
-                                                                                (s.MediaStreamType == MediaStreamType.VideoPreview || s.MediaStreamType == MediaStreamType.VideoRecord))
-                                                                                && g.SourceInfos.All(sourceInfo => videoDevices.Any(vd => vd.Id == sourceInfo.DeviceInformation.Id))).ToList();
-                    availableColorCameras = _frameSourceGroups.SelectMany(x => x.SourceInfos.Select(y => y.DeviceInformation)).Distinct();
+                    availableColorCameras = frameSourceInformation.MediaFrameSourceGroup.SourceInfos.Select(y => y.DeviceInformation).Distinct();
                 }
                 catch (Exception ex)
                 {
@@ -84,14 +81,39 @@ namespace Wifi_QR_code_scanner.Managers
 
             return availableColorCameras;
         }
+        public async Task<FrameSourceInformation> GetFrameSourceInformationAsync()
+        {
+            var frameSourceGroups = await MediaFrameSourceGroup.FindAllAsync();
+
+            MediaFrameSourceInfo colorSourceInfo = null;
+
+            foreach (var sourceGroup in frameSourceGroups)
+            {
+                foreach (var sourceInfo in sourceGroup.SourceInfos)
+                {
+                    if ((sourceInfo.MediaStreamType == MediaStreamType.VideoPreview|| sourceInfo.MediaStreamType==MediaStreamType.VideoRecord)
+                        && sourceInfo.SourceKind == MediaFrameSourceKind.Color)
+                    {
+                        colorSourceInfo = sourceInfo;
+                        break;
+                    }
+                }
+                if (colorSourceInfo != null)
+                {
+                    return new FrameSourceInformation(sourceGroup, colorSourceInfo);
+                }
+            }
+            return null;
+        }
 
         public async Task StartPreviewAsync(ComboboxItem comboboxItem)
         {
+            FrameSourceInformation frameSourceInformation = new FrameSourceInformation();
             try
             {
                 mediaCapture = new MediaCapture();
 
-                
+
                 var settings = new MediaCaptureInitializationSettings()
                 {
                     StreamingCaptureMode = StreamingCaptureMode.Video
@@ -99,12 +121,14 @@ namespace Wifi_QR_code_scanner.Managers
                 if (comboboxItem != null)
                 {
                     settings.VideoDeviceId = comboboxItem.ID;
+                    frameSourceInformation = comboboxItem.MediaFrameSourceInformation;
                 }
                 else
                 {
                     if (availableColorCameras == null)
                     {
-                        availableColorCameras = await GetFrameSourceGroupsAsync();
+                        frameSourceInformation = await GetFrameSourceInformationAsync();
+                        availableColorCameras = await GetFrameSourceGroupsAsync(frameSourceInformation);
                     }
                     settings.VideoDeviceId = availableColorCameras.First().Id;
                 }
@@ -151,6 +175,13 @@ namespace Wifi_QR_code_scanner.Managers
                 this.ScanForQRcodes = true;
                 previewWindowElement.Source = mediaCapture;
                 await mediaCapture.StartPreviewAsync();
+
+                //framereader setup for processing frames
+                //MediaFrameReader mediaFrameReader;
+                //mediaFrameReader = await mediaCapture.CreateFrameReaderAsync(mediaCapture.FrameSources[frameSourceInformation.MediaFrameSourceInfo.Id], MediaEncodingSubtypes.Argb32);
+                //mediaFrameReader.FrameArrived += ColorFrameReader_FrameArrivedAsync;
+                //await mediaFrameReader.StartAsync();
+
                 isPreviewing = true;             
                 var imgProp = new ImageEncodingProperties
                 {
@@ -160,14 +191,38 @@ namespace Wifi_QR_code_scanner.Managers
                 };
                 var bcReader = new BarcodeReader();
                 var qrCaptureInterval = 200;
+
+                var torch = mediaCapture.VideoDeviceController.TorchControl;
+                var exposureCompensationControl = mediaCapture.VideoDeviceController.ExposureCompensationControl;
+
+                if (torch.Supported) torch.Enabled = false;
+                //if (exposureCompensationControl.Supported) {
+                //    var maxSupported = exposureCompensationControl.Max;
+                //    var minSupported = exposureCompensationControl.Min;
+                //    var middleExposure = (maxSupported + minSupported) / 2;
+                //    var quarterExposure = (middleExposure + minSupported) / 2;
+                //    await exposureCompensationControl.SetValueAsync(quarterExposure);
+                //}
+
+                // Get information about the preview
+                var previewProperties = mediaCapture.VideoDeviceController.GetMediaStreamProperties(MediaStreamType.VideoPreview) as VideoEncodingProperties;
+
+                // Create a video frame in the desired format for the preview frame
+                //VideoFrame videoFrameFormatPlaceholder = new VideoFrame(BitmapPixelFormat.Bgra8, (int)previewProperties.Width, (int)previewProperties.Height);
+
                 while (!qrAnalyzerCancellationTokenSource.IsCancellationRequested && qrAnalyzerCancellationTokenSource != null && qrAnalyzerCancellationTokenSource.Token!=null)
                 {
                     //try capture qr code here
                     if (ScanForQRcodes)
                     {
-                        await findQRinImageAsync(imgProp, bcReader);
+                        //previewFrame = null;
+                        VideoFrame videoFrameFormatPlaceholder = new VideoFrame(BitmapPixelFormat.Bgra8, (int)previewProperties.Width, (int)previewProperties.Height);
+                            await mediaCapture.GetPreviewFrameAsync(videoFrameFormatPlaceholder);
+                            //videoFrameFormatPlaceholder = null;
+                            await findQRinImageAsync(bcReader, videoFrameFormatPlaceholder);
+                            videoFrameFormatPlaceholder.Dispose();
+                            videoFrameFormatPlaceholder = null;
                     }
-
 
                     await Task.Delay(qrCaptureInterval, qrAnalyzerCancellationTokenSource.Token);
                 }
@@ -184,6 +239,20 @@ namespace Wifi_QR_code_scanner.Managers
             {
                 Debug.WriteLine("another exception occurred.");
             }
+        }
+
+
+        private void ColorFrameReader_FrameArrivedAsync(MediaFrameReader sender, MediaFrameArrivedEventArgs args)
+        {
+            var mediaFrameReference = sender.TryAcquireLatestFrame();
+            var videoMediaFrame = mediaFrameReference?.VideoMediaFrame;
+
+            //if (videoMediaFrame != null)
+            //{
+            //    findQRinImageAsync(bcReader, videoMediaFrame.SoftwareBitmap);
+            //}
+
+            mediaFrameReference.Dispose();
         }
 
         private async void mediaCapture_CaptureDeviceExclusiveControlStatusChanged(MediaCapture sender, MediaCaptureDeviceExclusiveControlStatusChangedEventArgs args)
@@ -227,27 +296,36 @@ namespace Wifi_QR_code_scanner.Managers
 
         }
 
-        private async Task findQRinImageAsync(ImageEncodingProperties imgProp, BarcodeReader bcReader)
+        private async Task findQRinImageAsync(BarcodeReader bcReader, VideoFrame previeFrame)
         {
             //When the camera is suspending, the stream can fail
             try
             {
-                await mediaCapture.CapturePhotoToStreamAsync(imgProp, inMemoryRandomAccessStream);
-
-
-                inMemoryRandomAccessStream.Seek(0);
-                
-                await writeableBitmap.SetSourceAsync(inMemoryRandomAccessStream);
-                bcResult = bcReader.Decode(writeableBitmap);
-
+                bcResult = bcReader.Decode(previeFrame.SoftwareBitmap);
 
                 if (bcResult != null)
                 {
                     ScanForQRcodes = false;
 
-                    var torch = mediaCapture.VideoDeviceController.TorchControl;
+                    qrCodeDecodedDelegate.Invoke(bcResult.Text);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
+        }
 
-                    if (torch.Supported) torch.Enabled = false;
+        private async Task findQRinImageAsync(BarcodeReader bcReader, SoftwareBitmap softwareBitmap)
+        {
+            //When the camera is suspending, the stream can fail
+            try
+            {
+                bcResult = bcReader.Decode(softwareBitmap);
+
+                if (bcResult != null)
+                {
+                    ScanForQRcodes = false;
 
                     qrCodeDecodedDelegate.Invoke(bcResult.Text);
                 }

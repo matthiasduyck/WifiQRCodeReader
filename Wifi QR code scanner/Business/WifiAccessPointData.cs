@@ -9,7 +9,12 @@
         
         public override string ToString()
         {
-            return "Network Name (SSID): " + ssid + System.Environment.NewLine +  "Password: " + password + System.Environment.NewLine + "Authentication: " + this.wifiAccessPointSecurity;
+            return "Network Name (SSID): " + ssid + System.Environment.NewLine +  "Password: " + password + System.Environment.NewLine + "Authentication type: " + this.wifiAccessPointSecurity;
+        }
+
+        public string ToObfuscatedString()
+        {
+            return "Network Name (SSID): " + ssid + System.Environment.NewLine + "Password: " + "******" + System.Environment.NewLine + "Authentication type: " + this.wifiAccessPointSecurity;
         }
 
         public bool isvalid()
