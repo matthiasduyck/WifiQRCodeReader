@@ -240,6 +240,12 @@ namespace Wifi_QR_code_scanner
         private async void BtnSaveFile_Click(object sender, RoutedEventArgs e)
         {
             var _bitmap = new RenderTargetBitmap();
+            //verify they are filled in
+            if (this.imgQrCode.Source ==null)
+            {
+                MessageManager.ShowMessageToUserAsync("No image to save, please generate one first.");
+                return;
+            }
             await _bitmap.RenderAsync(this.imgQrCode);    //-----> This is my ImageControl.
 
             var savePicker = new FileSavePicker();
