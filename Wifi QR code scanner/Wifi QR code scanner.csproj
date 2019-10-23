@@ -130,6 +130,7 @@
     <Compile Include="Business\AppStatus.cs" />
     <Compile Include="Business\ComboboxItem.cs" />
     <Compile Include="Business\FrameSourceInformation.cs" />
+    <Compile Include="Business\PasswordGenerator.cs" />
     <Compile Include="Business\WifiAccessPointData.cs" />
     <Compile Include="Business\WifiStringParser.cs" />
     <Compile Include="MainPage.xaml.cs">

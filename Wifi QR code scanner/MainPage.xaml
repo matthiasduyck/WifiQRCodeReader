@@ -30,19 +30,21 @@
 
                         <TextBlock VerticalAlignment="Top" Height="30" Text="WiFi Network Name"/>
                         <TextBox Name="txtSSID" VerticalAlignment="Top" Height="32" Margin="0,30,0,0" PlaceholderText="MyWifiNetwork"></TextBox>
-                        <TextBlock VerticalAlignment="Top" Height="30" Margin="0,72,0,0" Text="Password"/>
-                        <TextBox Name="txtPass" VerticalAlignment="Top" Height="32" Margin="0,102,0,0" PlaceholderText="***************"></TextBox>
-                        <TextBlock VerticalAlignment="Top" Height="30" Margin="0,142,0,0" Text="Authentication Type"/>
-                        <ComboBox Name="cmbSecurity" SelectedIndex="0" Height="30" Margin="0,172,0,0" Width="168">
+                        <TextBlock VerticalAlignment="Top" Height="30" Margin="0,72,0,0" Text="Authentication Type"/>
+                        <ComboBox Name="cmbSecurity" SelectedIndex="0" Height="30" Margin="0,102,242,0" Width="168">
                             <ComboBoxItem Name="WPA2">WPA2 (default)</ComboBoxItem>
                             <ComboBoxItem Name="WPA">WPA</ComboBoxItem>
                             <ComboBoxItem Name="WEP">WEP</ComboBoxItem>
                             <ComboBoxItem Name="Open">None</ComboBoxItem>
                         </ComboBox>
+                        <TextBlock VerticalAlignment="Top" Height="30" Margin="0,142,0,0" Text="Password"/>
+                        <TextBox Name="txtPass" VerticalAlignment="Top" Height="32" Margin="0,172,242,0" PlaceholderText="***************"></TextBox>
+
 
                         <Button Name="btnGenerateQR" VerticalAlignment="Top" Height="30" Margin="0,212,0,0" Click="BtnGenerateQR_Click">Generate QR Code</Button>
                         <Image Name="imgQrCode" VerticalAlignment="Top" Height="200" Margin="0,252,0,0"></Image>
                         <Button Name="btnSaveFile" VerticalAlignment="Top" Height="30" Margin="0,470,0,0" Click="BtnSaveFile_Click">Save QR Code File</Button>
+                        <Button Name="btnGenerateRandomPassword" Content="Generate Random Strong Password" Height="32" Margin="0,172,0,0" VerticalAlignment="Top" Width="242" HorizontalAlignment="Right" Click="BtnGenerateRandomPassword_Click"/>
                     </Grid>
                 </ScrollViewer>
 

@@ -296,5 +296,25 @@ namespace Wifi_QR_code_scanner
                 await cameraManager.StartPreviewAsync(selectedCamera);
             }
         }
+
+        private void BtnGenerateRandomPassword_Click(object sender, RoutedEventArgs e)
+        {
+            var security = ((ComboBoxItem)cmbSecurity.SelectedItem).Content.ToString();
+            switch (security.ToLower())
+            {
+                case "wep":
+                    MessageManager.ShowMessageToUserAsync("WEP is not a secure standard!");
+                    this.txtPass.Text = "";
+                    break;
+                case "none":
+                    MessageManager.ShowMessageToUserAsync("No security standard selected! Select one of the WPA options to get a random password.");
+                    this.txtPass.Text = "";
+                    break;
+                default:
+                    string allowedCharsWPA = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_+=~[]{}|\\:;<>,.?/";//only include simple chars for typability when needed, full list: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_+=~`[]{}|\\:;\"'<>,.?/"
+                    this.txtPass.Text = PasswordGenerator.GenerateRandomPassword(60, allowedCharsWPA);
+                    break;
+            }
+        }
     }
 }
