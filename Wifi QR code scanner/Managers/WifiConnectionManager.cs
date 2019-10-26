@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Wifi_QR_code_scanner.Business;
+using Wifi_QR_code_scanner.Display;
 using Windows;
 using Windows.Devices;
 using Windows.Devices.WiFi;
@@ -12,18 +13,29 @@ namespace Wifi_QR_code_scanner.Managers
 {
     public class WifiConnectionManager
     {
-        public async Task ConnectToWifiNetwork(WifiAccessPointData wifiAccessPointData)
+        WiFiAdapter wiFiAdapter;
+        public WifiConnectionManager()
         {
-            //Windows.Devices.WiFi.WiFiAdapter.FindAllAdaptersAsync().;
+            InitializeWiFiAdapter();
+        }
+
+        public async Task InitializeWiFiAdapter()
+        {
             var result = await Windows.Devices.Enumeration.DeviceInformation.FindAllAsync(WiFiAdapter.GetDeviceSelector());
-            WiFiAdapter firstWifiAdapter;
             if (result.Count >= 1)
             {
-                firstWifiAdapter = await WiFiAdapter.FromIdAsync(result[0].Id);
+                wiFiAdapter = await WiFiAdapter.FromIdAsync(result[0].Id);
+            }
+        }
+
+        public async Task ConnectToWifiNetwork(WifiAccessPointData wifiAccessPointData)
+        {
+            if (wiFiAdapter!=null)
+            {
                 WiFiAvailableNetwork qualifyingWifi = null;
                 try
                 {
-                    qualifyingWifi = firstWifiAdapter.NetworkReport.AvailableNetworks.FirstOrDefault(N => N.Ssid == wifiAccessPointData.ssid);
+                    qualifyingWifi = wiFiAdapter.NetworkReport.AvailableNetworks.FirstOrDefault(N => N.Ssid == wifiAccessPointData.ssid);
                 }
                 catch (Exception)
                 {
@@ -34,11 +46,11 @@ namespace Wifi_QR_code_scanner.Managers
                     WiFiConnectionResult connectResult  = null;
                     if (string.IsNullOrWhiteSpace(wifiAccessPointData.password) || wifiAccessPointData.wifiAccessPointSecurity.Equals(WifiAccessPointSecurity.nopass))
                     {
-                        connectResult = await firstWifiAdapter.ConnectAsync(qualifyingWifi, WiFiReconnectionKind.Automatic);
+                        connectResult = await wiFiAdapter.ConnectAsync(qualifyingWifi, WiFiReconnectionKind.Automatic);
                     }
                     else
                     {
-                        connectResult = await firstWifiAdapter.ConnectAsync(qualifyingWifi, WiFiReconnectionKind.Automatic, new Windows.Security.Credentials.PasswordCredential() { Password = wifiAccessPointData.password });
+                        connectResult = await wiFiAdapter.ConnectAsync(qualifyingWifi, WiFiReconnectionKind.Automatic, new Windows.Security.Credentials.PasswordCredential() { Password = wifiAccessPointData.password });
                     }
                     if (connectResult != null && connectResult.ConnectionStatus!=WiFiConnectionStatus.Success)
                     {
@@ -70,6 +82,21 @@ namespace Wifi_QR_code_scanner.Managers
                     MessageManager.ShowMessageToUserAsync("No WiFi network found matching your code. Please move closer and try again or verify your code.");
                 }
             }
+            else
+            {
+                MessageManager.ShowMessageToUserAsync("Wifi adapter could not be found or initialised.");
+            }
+        }
+
+        public List<NetworkDisplayItem> ScanForAvailableNetworks()
+        {
+            if (wiFiAdapter != null)
+            {
+                var result = wiFiAdapter.ScanAsync();
+                var availableNetworks = wiFiAdapter.NetworkReport.AvailableNetworks;
+                return availableNetworks.OrderByDescending(x=>x.NetworkRssiInDecibelMilliwatts).Select(x=>new NetworkDisplayItem { ssid=x.Ssid }).ToList();
+            }
+            return null;
         }
     }
 }

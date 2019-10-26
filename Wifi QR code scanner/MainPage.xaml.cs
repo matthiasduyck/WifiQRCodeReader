@@ -17,6 +17,10 @@ using Windows.Graphics.Imaging;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Devices.Enumeration;
+using Windows.UI.Xaml.Media;
+using Windows.UI;
+using Windows.UI.Core;
+using Wifi_QR_code_scanner.Display;
 //using Wifi_QR_Code_Sanner_Library.Managers;
 //using Wifi_QR_Code_Sanner_Library.Domain;
 
@@ -32,6 +36,7 @@ namespace Wifi_QR_code_scanner
     {
         QRCameraManager cameraManager;
         WifiConnectionManager wifiConnectionManager;
+        System.Threading.Timer scanningTimer;
 
         private int activeTab = 0;
 
@@ -45,6 +50,8 @@ namespace Wifi_QR_code_scanner
             Application.Current.Resuming += Current_Resuming;
             Application.Current.LeavingBackground += Current_LeavingBackground;
             cameraManager.EnumerateCameras(cmbCameraSelect);
+            StartScanningForNetworks();
+            
         }
 
         public void ChangeAppStatus(AppStatus appStatus)
@@ -73,6 +80,41 @@ namespace Wifi_QR_code_scanner
         {
             Debug.WriteLine("resuming");
         }
+
+        private void StartScanningForNetworks()
+        {
+            //setup panel to display first
+            var brush = (SolidColorBrush)this.Resources["ApplicationPageBackgroundThemeBrush"];
+            var color = brush.Color;// = Color.FromArgb(255, 242, 101, 34);
+            this.lstNetworks.Background = brush;
+            scanningTimer = new System.Threading.Timer(
+            e => ScanForNetworksAndDisplay(),
+            null,
+            TimeSpan.Zero,
+            TimeSpan.FromSeconds(3));
+        }
+
+        private async void ScanForNetworksAndDisplay()
+        {
+            var availaibleNetworks = wifiConnectionManager.ScanForAvailableNetworks();
+            if (availaibleNetworks != null)
+            {
+                await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+                () =>
+                    {
+                        var availableNetworksDisplay = new List<NetworkDisplayItem>();
+
+                        foreach (var availableNetwork in availaibleNetworks)
+                        {
+                            availableNetworksDisplay.Add(availableNetwork);
+                        }
+
+                        this.lstNetworks.ItemsSource = availableNetworksDisplay;
+                    }
+                );
+            }
+        }
+
 
         /// <summary>
         /// Method to be triggered by delegate to display message to start connecting to a network

@@ -133,6 +133,7 @@
     <Compile Include="Business\PasswordGenerator.cs" />
     <Compile Include="Business\WifiAccessPointData.cs" />
     <Compile Include="Business\WifiStringParser.cs" />
+    <Compile Include="Display\NetworkDisplayItem.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
