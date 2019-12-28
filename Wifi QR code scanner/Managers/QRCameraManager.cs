@@ -214,7 +214,10 @@ namespace Wifi_QR_code_scanner.Managers
                         videoFrameFormatPlaceholder = null;
                     }
 
-                    await Task.Delay(qrCaptureInterval, qrAnalyzerCancellationTokenSource.Token);
+                    //await Task.Delay(qrCaptureInterval, qrAnalyzerCancellationTokenSource.Token);
+                    var delayTask = Task.Delay(qrCaptureInterval, qrAnalyzerCancellationTokenSource.Token);
+                    var continuationTask = delayTask.ContinueWith(task => { });
+                    await continuationTask;
                 }
             }
             catch (System.IO.FileLoadException)
@@ -250,6 +253,7 @@ namespace Wifi_QR_code_scanner.Managers
         {
             if (mediaCapture != null)
             {
+                qrAnalyzerCancellationTokenSource.Cancel();
                 qrAnalyzerCancellationTokenSource.Dispose();
                 if (isPreviewing)
                 {
