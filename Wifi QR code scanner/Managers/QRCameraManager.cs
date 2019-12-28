@@ -55,36 +55,40 @@ namespace Wifi_QR_code_scanner.Managers
 
         public async Task EnumerateCameras(ComboBox comboBox)
         {
-            var frameSourceInformation = await GetFrameSourceInformationAsync();
-            var videodevices = await GetFrameSourceGroupsAsync(frameSourceInformation);
-            foreach (var camera in videodevices)
+            var frameSourceInformations = await GetFrameSourceInformationAsync();
+            if (frameSourceInformations!=null && frameSourceInformations.Any())
             {
-                comboBox.Items.Add(new ComboboxItem(camera.Name,camera.Id,frameSourceInformation));
+                foreach (var frameSourceInformation in frameSourceInformations)
+                {
+                    var videodevices = await GetFrameSourceGroupsAsync(frameSourceInformation);
+                    foreach (var camera in videodevices)
+                    {
+                        comboBox.Items.Add(new ComboboxItem(camera.Name, camera.Id, frameSourceInformation));
+                    }
+                }
             }
-            
         }
 
         public async Task<IEnumerable<DeviceInformation>> GetFrameSourceGroupsAsync(FrameSourceInformation frameSourceInformation)
         {
-            if (availableColorCameras == null)
+            try
             {
-                try
-                {
-                    availableColorCameras = frameSourceInformation.MediaFrameSourceGroup.SourceInfos.Select(y => y.DeviceInformation).Distinct();
-                }
-                catch (Exception ex)
-                {
-                    MessageManager.ShowMessageToUserAsync("Tried to find all available color cameras but failed to do so.");
-                }
+                var availableColorCamera = frameSourceInformation.MediaFrameSourceGroup.SourceInfos.Select(y => y.DeviceInformation).Distinct();
+                return availableColorCamera;
             }
-
-            return availableColorCameras;
+            catch (Exception ex)
+            {
+                MessageManager.ShowMessageToUserAsync("Tried to find all available color cameras but failed to do so.");
+                return null;
+            }
         }
-        public async Task<FrameSourceInformation> GetFrameSourceInformationAsync()
+        public async Task<List<FrameSourceInformation>> GetFrameSourceInformationAsync()
         {
             var frameSourceGroups = await MediaFrameSourceGroup.FindAllAsync();
 
             MediaFrameSourceInfo colorSourceInfo = null;
+
+            var frameSourceInformations = new List<FrameSourceInformation>();
 
             foreach (var sourceGroup in frameSourceGroups)
             {
@@ -99,10 +103,10 @@ namespace Wifi_QR_code_scanner.Managers
                 }
                 if (colorSourceInfo != null)
                 {
-                    return new FrameSourceInformation(sourceGroup, colorSourceInfo);
+                    frameSourceInformations.Add(new FrameSourceInformation(sourceGroup, colorSourceInfo));
                 }
             }
-            return null;
+            return frameSourceInformations;
         }
 
         public async Task StartPreviewAsync(ComboboxItem comboboxItem)
@@ -126,7 +130,8 @@ namespace Wifi_QR_code_scanner.Managers
                 {
                     if (availableColorCameras == null)
                     {
-                        frameSourceInformation = await GetFrameSourceInformationAsync();
+                        var frameSourceInformations = await GetFrameSourceInformationAsync();
+                        frameSourceInformation = frameSourceInformations.First();
                         availableColorCameras = await GetFrameSourceGroupsAsync(frameSourceInformation);
                     }
                     settings.VideoDeviceId = availableColorCameras.First().Id;
