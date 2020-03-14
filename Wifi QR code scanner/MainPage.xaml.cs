@@ -36,6 +36,7 @@ namespace Wifi_QR_code_scanner
     {
         QRCameraManager cameraManager;
         WifiConnectionManager wifiConnectionManager;
+        BarcodeManager barcodeManager;
         System.Threading.Timer scanningTimer;
 
         private int activeTab = 0;
@@ -46,6 +47,7 @@ namespace Wifi_QR_code_scanner
             QrCodeDecodedDelegate handler = new QrCodeDecodedDelegate(handleQRcodeFound);
             cameraManager = new QRCameraManager(PreviewControl, Dispatcher, handler);
             wifiConnectionManager = new WifiConnectionManager();
+            barcodeManager = new BarcodeManager();
             Application.Current.Suspending += Application_Suspending;
             Application.Current.Resuming += Current_Resuming;
             Application.Current.LeavingBackground += Current_LeavingBackground;
@@ -356,6 +358,61 @@ namespace Wifi_QR_code_scanner
                     string allowedCharsWPA = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_+=~[]{}|\\:;<>,.?/";//only include simple chars for typability when needed, full list: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_+=~`[]{}|\\:;\"'<>,.?/"
                     this.txtPass.Text = PasswordGenerator.GenerateRandomPassword(60, allowedCharsWPA);
                     break;
+            }
+        }
+
+        private void LstNetworks_PointerEntered(object sender, Windows.UI.Xaml.Input.PointerRoutedEventArgs e)
+        {
+            this.lstNetworks.Opacity = 0.9;
+        }
+
+        private void LstNetworks_PointerExited(object sender, Windows.UI.Xaml.Input.PointerRoutedEventArgs e)
+        {
+            this.lstNetworks.Opacity = 0.4;
+        }
+
+        private async void BtnOpenQRImage_ClickAsync(object sender, RoutedEventArgs e)
+        {
+            var picker = new Windows.Storage.Pickers.FileOpenPicker();
+            picker.ViewMode = Windows.Storage.Pickers.PickerViewMode.Thumbnail;
+            picker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
+            picker.FileTypeFilter.Add(".jpg");
+            picker.FileTypeFilter.Add(".jpeg");
+            picker.FileTypeFilter.Add(".png");
+
+            Windows.Storage.StorageFile file = await picker.PickSingleFileAsync();
+            if (file != null)
+            {
+                using (IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read))
+                {
+                    BitmapDecoder decoder;
+                    try
+                    {
+                        // Create the decoder from the stream
+                        decoder = await BitmapDecoder.CreateAsync(stream);
+                        // Get the SoftwareBitmap representation of the file
+                        var softwareBitmap = await decoder.GetSoftwareBitmapAsync();
+                        var QRcodeResult = barcodeManager.DecodeBarcodeImage(softwareBitmap);
+                        handleQRcodeFound(QRcodeResult);
+                    }
+                    catch(Exception ex)
+                    {
+                        MessageDialog msgbox = new MessageDialog("An error occurred: " + ex.Message);
+                    }                   
+                }
+            }
+            else
+            {
+                MessageDialog msgbox = new MessageDialog("No file selected.");
+
+                // Set the command that will be invoked by default
+                msgbox.DefaultCommandIndex = 0;
+
+                // Set the command to be invoked when escape is pressed
+                msgbox.CancelCommandIndex = 1;
+
+                // Show the message dialog
+                await msgbox.ShowAsync();
             }
         }
     }

@@ -16,7 +16,7 @@
                 <!--Pivot content goes here-->
                 <Grid>
                     <CaptureElement Name="PreviewControl" Stretch="Uniform" Margin="0,0,0,40"/>
-                    <ListView Name="lstNetworks" Width="160"  VerticalAlignment="Stretch" Padding="2,8,2,2" HorizontalAlignment="Right" Opacity="0.5" Header="   Available networks:" Visibility="Visible" Background="Gray" Margin="0,0,0,0">
+                    <ListView Name="lstNetworks" Width="160"  VerticalAlignment="Stretch" Padding="2,8,2,2" HorizontalAlignment="Right" Opacity="0.5" Header="   Nearby networks:" Visibility="Visible" Background="Gray" Margin="0,0,0,0" PointerEntered="LstNetworks_PointerEntered" PointerExited="LstNetworks_PointerExited">
                         <ListView.ItemTemplate>
                             <DataTemplate x:Name="lstItemTemplate">
                                 <Grid>
@@ -57,6 +57,14 @@
                     </Grid>
                 </ScrollViewer>
 
+            </PivotItem>
+            <PivotItem Header="Open QR Code Image">
+                <ScrollViewer VerticalScrollBarVisibility="Visible">
+                    <Grid Margin="20,20,20,20">
+                        <TextBlock VerticalAlignment="Top" Height="30" Text="Open an image containing a WiFi QR Code:"/>
+                        <Button Name="btnOpenQRImage" VerticalAlignment="Top" Height="35" Margin="0,30,0,0" Click="BtnOpenQRImage_ClickAsync">Open Image File</Button>
+                    </Grid>
+                </ScrollViewer>
             </PivotItem>
         </Pivot>
 
