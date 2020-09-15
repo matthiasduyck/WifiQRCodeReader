@@ -57,6 +57,16 @@ namespace Wifi_QR_code_scanner.Business
                     result.wifiAccessPointSecurity = WifiAccessPointSecurity.nopass;
                 }
 
+                Regex hiddenRegex = new Regex(@"H:(.*?)((?<!\\);)");
+                Match hiddenMatch = hiddenRegex.Match(wifiString);
+                if (hiddenMatch.Success)
+                {
+                    if (hiddenMatch.Value.Contains("true", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        result.hidden = true;
+                    }
+                }
+
                 return result;
             }
             catch(Exception)

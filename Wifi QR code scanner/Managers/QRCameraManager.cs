@@ -42,12 +42,12 @@ namespace Wifi_QR_code_scanner.Managers
 
         public bool ScanForQRcodes { get; set; }
 
-        public QRCameraManager(CaptureElement previewWindowElement, CoreDispatcher dispatcher, QrCodeDecodedDelegate qrCodeDecodedDelegate)
+        public QRCameraManager(CaptureElement previewWindowElement, CoreDispatcher dispatcher, QrCodeDecodedDelegate qrCodeDecodedDelegate, CancellationTokenSource qrAnalyzerCancellationTokenSource)
         {
             this.previewWindowElement = previewWindowElement;
             this.dispatcher = dispatcher;
             this.qrCodeDecodedDelegate = qrCodeDecodedDelegate;
-            var qrAnalyzerCancellationTokenSource = new CancellationTokenSource();
+            //var qrAnalyzerCancellationTokenSource = new CancellationTokenSource();
             this.qrAnalyzerCancellationTokenSource = qrAnalyzerCancellationTokenSource;
             this.inMemoryRandomAccessStream = new InMemoryRandomAccessStream();
             writeableBitmap = new WriteableBitmap(imgCaptureWidth, imgCaptureHeight);

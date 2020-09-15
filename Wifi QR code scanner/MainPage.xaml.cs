@@ -21,6 +21,7 @@ using Windows.UI.Xaml.Media;
 using Windows.UI;
 using Windows.UI.Core;
 using Wifi_QR_code_scanner.Display;
+using System.Threading;
 //using Wifi_QR_Code_Sanner_Library.Managers;
 //using Wifi_QR_Code_Sanner_Library.Domain;
 
@@ -38,14 +39,20 @@ namespace Wifi_QR_code_scanner
         WifiConnectionManager wifiConnectionManager;
         BarcodeManager barcodeManager;
         System.Threading.Timer scanningTimer;
+        CancellationTokenSource qrAnalyzerCancellationTokenSource;
 
         private int activeTab = 0;
 
         public MainPage()
         {
             this.InitializeComponent();
+            //catchall crash handler
+            AppDomain currentDomain = AppDomain.CurrentDomain;
+            currentDomain.UnhandledException += new System.UnhandledExceptionEventHandler(CrashHandler);
+
             QrCodeDecodedDelegate handler = new QrCodeDecodedDelegate(handleQRcodeFound);
-            cameraManager = new QRCameraManager(PreviewControl, Dispatcher, handler);
+            qrAnalyzerCancellationTokenSource = new CancellationTokenSource();
+            cameraManager = new QRCameraManager(PreviewControl, Dispatcher, handler, qrAnalyzerCancellationTokenSource);
             wifiConnectionManager = new WifiConnectionManager();
             barcodeManager = new BarcodeManager();
             Application.Current.Suspending += Application_Suspending;
@@ -54,6 +61,13 @@ namespace Wifi_QR_code_scanner
             cameraManager.EnumerateCameras(cmbCameraSelect);
             StartScanningForNetworks();
             
+        }
+
+        static void CrashHandler(object sender, System.UnhandledExceptionEventArgs args)
+        {
+            Exception e = (Exception)args.ExceptionObject;
+            Console.WriteLine("CrashHandler caught : " + e.Message);
+            Console.WriteLine("Runtime terminating: {0}", args.IsTerminating);
         }
 
         public void ChangeAppStatus(AppStatus appStatus)
@@ -202,14 +216,19 @@ namespace Wifi_QR_code_scanner
         }
         private async void Application_Suspending(object sender, SuspendingEventArgs e)
         {
-            Debug.WriteLine("Application Suspending");
-            // Handle global application events only if this page is active
-            if (Frame.CurrentSourcePageType == typeof(MainPage))
-            {
-                var deferral = e.SuspendingOperation.GetDeferral();
-                await cameraManager.CleanupCameraAsync();
-                deferral.Complete();
-            }
+            //Debug.WriteLine("Application Suspending");
+            var deferral = e.SuspendingOperation.GetDeferral();
+
+            this.scanningTimer.Dispose();
+            this.cameraManager.ScanForQRcodes = false;
+            this.qrAnalyzerCancellationTokenSource.Cancel();
+
+            await cameraManager.CleanupCameraAsync();
+
+            this.barcodeManager = null;
+            this.cameraManager = null;
+            this.wifiConnectionManager = null;
+            deferral.Complete();
         }
 
         private void TabsView_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -257,9 +276,10 @@ namespace Wifi_QR_code_scanner
             }
 
             //verify they are valid
-            if (!wifiData.isvalid())
+            string validationReason;
+            if (!wifiData.isvalid(out validationReason))
             {
-                MessageManager.ShowMessageToUserAsync("Wifi data not valid, please verify all fields.");
+                MessageManager.ShowMessageToUserAsync("Wifi data not valid: " + validationReason);
                 return;
             }
 
