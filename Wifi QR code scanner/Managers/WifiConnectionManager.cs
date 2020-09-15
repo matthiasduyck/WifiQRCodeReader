@@ -35,7 +35,15 @@ namespace Wifi_QR_code_scanner.Managers
                 WiFiAvailableNetwork qualifyingWifi = null;
                 try
                 {
-                    qualifyingWifi = wiFiAdapter.NetworkReport.AvailableNetworks.FirstOrDefault(N => N.Ssid == wifiAccessPointData.ssid);
+                    if (wifiAccessPointData.hidden)
+                    {
+                        qualifyingWifi = wiFiAdapter.NetworkReport.AvailableNetworks.FirstOrDefault(N => N.Ssid == "");
+                    }
+                    else
+                    {
+                        qualifyingWifi = wiFiAdapter.NetworkReport.AvailableNetworks.FirstOrDefault(N => N.Ssid == wifiAccessPointData.ssid);
+                    }
+
                 }
                 catch (Exception)
                 {
@@ -47,6 +55,10 @@ namespace Wifi_QR_code_scanner.Managers
                     if (string.IsNullOrWhiteSpace(wifiAccessPointData.password) || wifiAccessPointData.wifiAccessPointSecurity.Equals(WifiAccessPointSecurity.nopass))
                     {
                         connectResult = await wiFiAdapter.ConnectAsync(qualifyingWifi, WiFiReconnectionKind.Automatic);
+                    }
+                    else if (wifiAccessPointData.hidden)
+                    {
+                        connectResult = await wiFiAdapter.ConnectAsync(qualifyingWifi, WiFiReconnectionKind.Automatic, new Windows.Security.Credentials.PasswordCredential() { Password = wifiAccessPointData.password }, wifiAccessPointData.ssid);
                     }
                     else
                     {
