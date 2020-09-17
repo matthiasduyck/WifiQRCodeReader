@@ -12,10 +12,13 @@
 
     <Grid>
         <Pivot x:Name="TabsView" SelectionChanged="TabsView_SelectionChanged">
-            <PivotItem Header="Scan QR Code">
+            <PivotItem Name="scan" Header="Scan QR Code">
                 <!--Pivot content goes here-->
                 <Grid>
+                    <!--<ProgressRing Visibility="Visible" HorizontalAlignment="Center" Margin="0,0,0,0" VerticalAlignment="Center"/>-->
+
                     <CaptureElement Name="PreviewControl" Stretch="Uniform" Margin="0,0,0,40"/>
+
                     <ListView Name="lstNetworks" Width="160"  VerticalAlignment="Stretch" Padding="2,8,2,2" HorizontalAlignment="Right" Opacity="0.5" Header="   Nearby networks:" Visibility="Visible" Background="Gray" Margin="0,0,0,0" PointerEntered="LstNetworks_PointerEntered" PointerExited="LstNetworks_PointerExited">
                         <ListView.ItemTemplate>
                             <DataTemplate x:Name="lstItemTemplate">

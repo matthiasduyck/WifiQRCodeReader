@@ -43,6 +43,8 @@ namespace Wifi_QR_code_scanner
 
         private int activeTab = 0;
 
+        private bool HasBeenDeactivated { get; set; }
+
         public MainPage()
         {
             this.InitializeComponent();
@@ -233,16 +235,59 @@ namespace Wifi_QR_code_scanner
 
         private void TabsView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            activeTab = this.TabsView.SelectedIndex;
-            if (activeTab == 0)
+            var activeTabName = ((PivotItem)(sender as Pivot).SelectedItem).Name;
+            //activeTab = this.TabsView.SelectedIndex;
+            if (!string.IsNullOrEmpty(activeTabName) && activeTabName=="scan")
             {
+                ActivateCameraPreviewAndScan();
                 this.cameraManager.ScanForQRcodes = true;
                 ChangeAppStatus(AppStatus.scanningForQR);
+
+                
             }
             else
             {
+                DeActivateCameraPreviewAndScan();
                 this.cameraManager.ScanForQRcodes = false;
                 ChangeAppStatus(AppStatus.waitingForUserInput);
+
+                
+            }
+        }
+        private async void ActivateCameraPreviewAndScan()
+        {
+            var selected = cmbCameraSelect.SelectedItem;
+            if (cameraManager != null && cameraManager.ScanForQRcodes == false && this.HasBeenDeactivated)
+            {
+                this.HasBeenDeactivated = false;
+                if (selected != null && selected is Wifi_QR_code_scanner.Business.ComboboxItem)
+                {
+                    var selectedCamera = ((Wifi_QR_code_scanner.Business.ComboboxItem)cmbCameraSelect.SelectedItem);
+                    //start cam again
+                    await cameraManager.StartPreviewAsync(selectedCamera);
+                }
+                else
+                {
+                    //start cam again
+                    await cameraManager.StartPreviewAsync(null);
+                }
+            }
+        }
+        private async void DeActivateCameraPreviewAndScan()
+        {
+            if (cameraManager != null && cameraManager.ScanForQRcodes == true && !this.HasBeenDeactivated)
+            {
+                this.HasBeenDeactivated = true;
+                //stop cam
+                cameraManager.ScanForQRcodes = false;
+                try
+                {
+                    await cameraManager.CleanupCameraAsync();
+                }
+                catch (Exception)
+                {
+                    //todo, investigate why this fails sometimes
+                }
             }
         }
 
