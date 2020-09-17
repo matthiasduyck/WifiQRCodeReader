@@ -252,6 +252,7 @@ namespace Wifi_QR_code_scanner
             var ssid = this.txtSSID.Text;
             var password = this.txtPass.Text;
             var security = ((ComboBoxItem)cmbSecurity.SelectedItem).Content.ToString();
+            var hidden = chckHidden.IsChecked??false;
             //verify they are filled in
             if (string.IsNullOrEmpty(ssid))
             {
@@ -261,6 +262,7 @@ namespace Wifi_QR_code_scanner
 
             var wifiData = new WifiAccessPointData();
             wifiData.password = password;
+            wifiData.hidden = hidden;
             wifiData.ssid = ssid;
             if (security == "WEP")
             {

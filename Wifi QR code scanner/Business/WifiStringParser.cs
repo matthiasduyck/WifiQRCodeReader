@@ -95,6 +95,11 @@ namespace Wifi_QR_code_scanner.Business
                 result += "P:" + escapeSpecialChars(wifiAccessPointData.password)+";";
             }
 
+            if (wifiAccessPointData.hidden)
+            {
+                result += "H:true;";
+            }
+
             result += ";";
 
             return result;
