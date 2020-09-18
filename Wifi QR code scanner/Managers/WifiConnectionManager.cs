@@ -106,7 +106,7 @@ namespace Wifi_QR_code_scanner.Managers
             {
                 var result = wiFiAdapter.ScanAsync();
                 var availableNetworks = wiFiAdapter.NetworkReport.AvailableNetworks;
-                return availableNetworks.OrderByDescending(x=>x.NetworkRssiInDecibelMilliwatts).Select(x=>new NetworkDisplayItem { ssid=x.Ssid }).ToList();
+                return availableNetworks.OrderByDescending(x=>x.NetworkRssiInDecibelMilliwatts).Select(x=>new NetworkDisplayItem(x.Ssid)).ToList();
             }
             return null;
         }

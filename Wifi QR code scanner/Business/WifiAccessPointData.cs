@@ -12,12 +12,12 @@ namespace Wifi_QR_code_scanner.Business
         
         public override string ToString()
         {
-            return "Network Name (SSID): " + ssid + System.Environment.NewLine +  "Password: " + password + System.Environment.NewLine + "Authentication type: " + this.wifiAccessPointSecurity;
+            return "Network Name (SSID): " + ssid + System.Environment.NewLine +  "Password: " + password + System.Environment.NewLine + "Authentication type: " + this.wifiAccessPointSecurity + (this.hidden? System.Environment.NewLine + "Hidden":"");
         }
 
         public string ToObfuscatedString()
         {
-            return "Network Name (SSID): " + ssid + System.Environment.NewLine + "Password: " + "******" + System.Environment.NewLine + "Authentication type: " + this.wifiAccessPointSecurity;
+            return "Network Name (SSID): " + ssid + System.Environment.NewLine + "Password: " + "******" + System.Environment.NewLine + "Authentication type: " + this.wifiAccessPointSecurity + (this.hidden ? System.Environment.NewLine + "Hidden" : "");
         }
 
         public bool isvalid(out string validationreason)

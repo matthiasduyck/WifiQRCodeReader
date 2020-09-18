@@ -23,7 +23,7 @@
                         <ListView.ItemTemplate>
                             <DataTemplate x:Name="lstItemTemplate">
                                 <Grid>
-                                    <TextBlock Text="{Binding ssid}" TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding Ssid}" TextWrapping="Wrap" />
                                 </Grid>
                             </DataTemplate>
                         </ListView.ItemTemplate>
