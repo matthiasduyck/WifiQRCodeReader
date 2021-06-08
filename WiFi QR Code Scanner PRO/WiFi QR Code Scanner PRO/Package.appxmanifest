@@ -7,14 +7,14 @@
   IgnorableNamespaces="uap mp">
 
   <Identity
-    Name="59867MatthiasDuyck.WiFiQRCodeScanner"
+    Name="59867MatthiasDuyck.WiFiQRCodeScannerPRO"
     Publisher="CN=DA2D21D8-3390-4818-A996-7B7A779D9778"
-    Version="0.3.8.0" />
+    Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="80184bf4-2faf-4f7b-af61-40d7f8767e9f" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="5822b08c-a45d-46ee-8b14-964cedccaf7d" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>WiFi QR Code Scanner</DisplayName>
+    <DisplayName>WiFi QR Code Scanner PRO</DisplayName>
     <PublisherDisplayName>Matthias Duyck</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
@@ -30,12 +30,12 @@
   <Applications>
     <Application Id="App"
       Executable="$targetnametoken$.exe"
-      EntryPoint="Wifi_QR_code_scanner.App">
+      EntryPoint="WiFi_QR_Code_Scanner_PRO.App">
       <uap:VisualElements
-        DisplayName="WiFi QR Code Scanner"
+        DisplayName="WiFi QR Code Scanner PRO"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png"
-        Description="Wifi QR code scanner"
+        Description="WiFi QR Code Scanner PRO"
         BackgroundColor="transparent">
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"/>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
@@ -45,8 +45,5 @@
 
   <Capabilities>
     <Capability Name="internetClient" />
-    <DeviceCapability Name="microphone"/>
-    <DeviceCapability Name="webcam"/>
-    <DeviceCapability Name="wiFiControl" />
   </Capabilities>
 </Package>

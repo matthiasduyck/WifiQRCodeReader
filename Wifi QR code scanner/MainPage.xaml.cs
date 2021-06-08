@@ -41,9 +41,10 @@ namespace Wifi_QR_code_scanner
         System.Threading.Timer scanningTimer;
         CancellationTokenSource qrAnalyzerCancellationTokenSource;
 
-        private int activeTab = 0;
 
         private bool HasBeenDeactivated { get; set; }
+
+        private string lastQrSSid { get; set; }
 
         public MainPage()
         {
@@ -62,7 +63,10 @@ namespace Wifi_QR_code_scanner
             Application.Current.LeavingBackground += Current_LeavingBackground;
             cameraManager.EnumerateCameras(cmbCameraSelect);
             StartScanningForNetworks();
-            
+
+            this.donateLnk.NavigateUri = new Uri("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=MSU2BD59P7442&source=url");            
+            this.donateLnkGenerate.NavigateUri = new Uri("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=MSU2BD59P7442&source=url");            
+            this.donateLnkOpen.NavigateUri = new Uri("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=MSU2BD59P7442&source=url");            
         }
 
         static void CrashHandler(object sender, System.UnhandledExceptionEventArgs args)
@@ -346,6 +350,9 @@ namespace Wifi_QR_code_scanner
             var result = qr.Write(wifiQrString);
             //set as source
             this.imgQrCode.Source = result;
+            this.lastQrSSid = wifiData.ssid;
+            //make save button visible
+            this.btnSaveFile.Visibility = Visibility.Visible;
         }
 
         private async void BtnSaveFile_Click(object sender, RoutedEventArgs e)
@@ -362,7 +369,7 @@ namespace Wifi_QR_code_scanner
             var savePicker = new FileSavePicker();
             savePicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
             savePicker.FileTypeChoices.Add("Image", new List<string>() { ".jpg" });
-            savePicker.SuggestedFileName = "QRCodeImage" + DateTime.Now.ToString("yyyyMMddhhmmss"); //todo add ssid name
+            savePicker.SuggestedFileName = "QRCodeImage_" + this.lastQrSSid + "_" + DateTime.Now.ToString("yyyyMMddhhmmss"); //todo add ssid name
             StorageFile savefile = await savePicker.PickSaveFileAsync();
             if (savefile == null)
                 return;

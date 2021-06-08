@@ -11,6 +11,7 @@
 
 
     <Grid>
+
         <Pivot x:Name="TabsView" SelectionChanged="TabsView_SelectionChanged">
             <PivotItem Name="scan" Header="Scan QR Code">
                 <!--Pivot content goes here-->
@@ -33,6 +34,7 @@
                     <ComboBox SelectionChanged="CmbCameraSelect_SelectionChanged" Name="cmbCameraSelect" SelectedIndex="0" Height="30" Margin="0,0,0,5" Width="168" VerticalAlignment="Bottom">
                         <ComboBoxItem Name="Select">Select Camera</ComboBoxItem>
                     </ComboBox>
+                    <HyperlinkButton Name="donateLnk" Content="Donate to the developer" Margin="0,0,5,6" VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
                 </Grid>
             </PivotItem>
             <PivotItem Header="Create QR Code">
@@ -51,16 +53,17 @@
                         </ComboBox>
                         <TextBlock VerticalAlignment="Top" Height="30" Margin="0,142,0,0" Text="Password"/>
                         <TextBox Name="txtPass" VerticalAlignment="Top" Height="32" Margin="0,172,242,0" PlaceholderText="***************"></TextBox>
-                        <TextBlock VerticalAlignment="Top" Height="30" Margin="0,222,0,0" Text="Hide network name"/>
-                        <CheckBox Name="chckHidden" Content="Hidden" Height="30" Margin="0,242,0,0" VerticalAlignment="Top"/>
+                        <TextBlock VerticalAlignment="Top" Height="30" Margin="0,212,0,0" Text="Hide network name"/>
+                        <CheckBox Name="chckHidden" Content="Hidden" Height="30" Margin="0,232,0,0" VerticalAlignment="Top"/>
 
 
 
 
-                        <Button Name="btnGenerateQR" VerticalAlignment="Top" Height="30" Margin="0,312,0,0" Click="BtnGenerateQR_Click">Generate QR Code</Button>
-                        <Image Name="imgQrCode" VerticalAlignment="Top" Height="200" Margin="0,252,0,0"></Image>
-                        <Button Name="btnSaveFile" VerticalAlignment="Top" Height="30" Margin="0,470,0,0" Click="BtnSaveFile_Click">Save QR Code File</Button>
+                        <Button Name="btnGenerateQR" VerticalAlignment="Top" Height="30" Margin="0,282,0,0" Click="BtnGenerateQR_Click">Generate QR Code</Button>
+                        <Image Name="imgQrCode" VerticalAlignment="Top" Height="200" Margin="0,282,0,0"></Image>
+                        <Button Name="btnSaveFile" VerticalAlignment="Top" Height="30" Margin="0,452,0,0" Click="BtnSaveFile_Click" Visibility="Collapsed">Save QR Code File</Button>
                         <Button Name="btnGenerateRandomPassword" Content="Generate Random Strong Password" Height="32" Margin="0,172,0,0" VerticalAlignment="Top" Width="242" HorizontalAlignment="Right" Click="BtnGenerateRandomPassword_Click"/>
+                        <HyperlinkButton Name="donateLnkGenerate" Content="Donate to the developer" Margin="0,0,0,6" VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
                     </Grid>
                 </ScrollViewer>
 
@@ -70,11 +73,11 @@
                     <Grid Margin="20,20,20,20">
                         <TextBlock VerticalAlignment="Top" Height="30" Text="Open an image containing a WiFi QR Code:"/>
                         <Button Name="btnOpenQRImage" VerticalAlignment="Top" Height="35" Margin="0,30,0,0" Click="BtnOpenQRImage_ClickAsync">Open Image File</Button>
+                        <HyperlinkButton Name="donateLnkOpen" Content="Donate to the developer" Margin="0,0,0,6" VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
                     </Grid>
                 </ScrollViewer>
             </PivotItem>
         </Pivot>
-
     </Grid>
 
 </Page>
