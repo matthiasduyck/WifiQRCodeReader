@@ -27,13 +27,9 @@ using System.Threading;
 
 namespace Wifi_QR_code_scanner
 {
-    /// <summary>
-    /// Delegate to be triggered on QR capture
-    /// </summary>
-    /// <param name="qrmessage"></param>
-    public delegate void QrCodeDecodedDelegate(string qrmessage);
+    
 
-    public sealed partial class MainPage : Page
+    public partial class MainPage : Page
     {
         QRCameraManager cameraManager;
         WifiConnectionManager wifiConnectionManager;

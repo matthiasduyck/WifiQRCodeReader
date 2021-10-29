@@ -12,13 +12,20 @@
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion Condition=" '$(TargetPlatformVersion)' == '' ">10.0.17763.0</TargetPlatformVersion>
-    <TargetPlatformMinVersion>10.0.15063.0</TargetPlatformMinVersion>
+    <TargetPlatformMinVersion>10.0.16299.0</TargetPlatformMinVersion>
     <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WindowsXamlEnableOverview>true</WindowsXamlEnableOverview>
     <PackageCertificateKeyFile>WiFi QR Code Scanner PRO_StoreKey.pfx</PackageCertificateKeyFile>
+    <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
+    <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
+    <AppxBundle>Always</AppxBundle>
+    <AppxBundlePlatforms>x86|x64|arm|arm64</AppxBundlePlatforms>
     <PackageCertificateThumbprint>6A5FFD496508A5BB375DEBD6A9E34AD7AEF3305C</PackageCertificateThumbprint>
+    <AppInstallerUpdateFrequency>1</AppInstallerUpdateFrequency>
+    <AppInstallerCheckForUpdateFrequency>OnApplicationRun</AppInstallerCheckForUpdateFrequency>
+    <AppxPackageDir>C:\Users\Matthias\Documents\</AppxPackageDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
@@ -117,12 +124,46 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\..\Wifi QR code scanner\Business\AppStatus.cs">
+      <Link>Business\AppStatus.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Wifi QR code scanner\Business\ComboboxItem.cs">
+      <Link>Business\ComboboxItem.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Wifi QR code scanner\Business\FrameSourceInformation.cs">
+      <Link>Business\FrameSourceInformation.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Wifi QR code scanner\Business\PasswordGenerator.cs">
+      <Link>Business\PasswordGenerator.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Wifi QR code scanner\Business\WifiAccessPointData.cs">
+      <Link>Business\WifiAccessPointData.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Wifi QR code scanner\Business\WifiStringParser.cs">
+      <Link>Business\WifiStringParser.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Wifi QR code scanner\Display\NetworkDisplayItem.cs">
+      <Link>Display\NetworkDisplayItem.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Wifi QR code scanner\Managers\BarcodeManager.cs">
+      <Link>Managers\BarcodeManager.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Wifi QR code scanner\Managers\MessageManager.cs">
+      <Link>Managers\MessageManager.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Wifi QR code scanner\Managers\QRCameraManager.cs">
+      <Link>Managers\QRCameraManager.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Wifi QR code scanner\Managers\WifiConnectionManager.cs">
+      <Link>Managers\WifiConnectionManager.cs</Link>
+    </Compile>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Managers\StoredCredentialsManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -157,6 +198,14 @@
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
       <Version>6.2.8</Version>
     </PackageReference>
+    <PackageReference Include="ZXing.Net">
+      <Version>0.16.4</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <SDKReference Include="WindowsDesktop, Version=10.0.17763.0">
+      <Name>Windows Desktop Extensions for the UWP</Name>
+    </SDKReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

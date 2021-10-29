@@ -22,6 +22,11 @@ using Windows.Graphics.Imaging;
 
 namespace Wifi_QR_code_scanner.Managers
 {
+    /// <summary>
+    /// Delegate to be triggered on QR capture
+    /// </summary>
+    /// <param name="qrmessage"></param>
+    public delegate void QrCodeDecodedDelegate(string qrmessage);
     public class QRCameraManager
     {
         MediaCapture mediaCapture;
