@@ -27,6 +27,7 @@ using System.Threading;
 using Wifi_QR_code_scanner;
 using System.Collections.ObjectModel;
 using WiFi_QR_Code_Scanner_PRO.Managers;
+using Windows.Foundation.Metadata;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -72,6 +73,15 @@ namespace WiFi_QR_Code_Scanner_PRO
             StoredCredentials.Add(new WifiAccessPointDataViewModel(new WifiAccessPointData(){password="pass3",ssid="ssid3" }));
             StoredCredentials.Add(new WifiAccessPointDataViewModel(new WifiAccessPointData(){password="pass4",ssid="ssid4" }));
 
+            temp();
+        }
+
+        static async void temp()
+        {
+            if (ApiInformation.IsApiContractPresent("Windows.ApplicationModel.FullTrustAppContract", 1, 0))
+            {
+                await FullTrustProcessLauncher.LaunchFullTrustProcessForCurrentAppAsync();
+            }
         }
 
         static void CrashHandler(object sender, System.UnhandledExceptionEventArgs args)
