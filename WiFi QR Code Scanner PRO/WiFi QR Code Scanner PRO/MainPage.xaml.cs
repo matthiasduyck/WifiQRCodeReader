@@ -73,7 +73,7 @@ namespace WiFi_QR_Code_Scanner_PRO
             StoredCredentials.Add(new WifiAccessPointDataViewModel(new WifiAccessPointData(){password="pass3",ssid="ssid3" }));
             StoredCredentials.Add(new WifiAccessPointDataViewModel(new WifiAccessPointData(){password="pass4",ssid="ssid4" }));
 
-            temp();
+            //temp();
         }
 
         static async void temp()

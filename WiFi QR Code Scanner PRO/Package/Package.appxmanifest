@@ -40,6 +40,9 @@
         <uap:SplashScreen Image="Images\SplashScreen.png" />
       </uap:VisualElements>
       <Extensions>
+        <uap:Extension Category="windows.appService">
+          <uap:AppService Name="SampleInteropService" />
+        </uap:Extension>
         <desktop:Extension
           xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
           Category="windows.fullTrustProcess"
@@ -51,5 +54,9 @@
   <Capabilities>
     <Capability Name="internetClient" />
     <rescap:Capability Name="runFullTrust" />
+    <rescap:Capability Name="broadFileSystemAccess" />
+    <DeviceCapability Name="microphone"/>
+    <DeviceCapability Name="webcam"/>
+    <DeviceCapability Name="wiFiControl" />
   </Capabilities>
 </Package>
