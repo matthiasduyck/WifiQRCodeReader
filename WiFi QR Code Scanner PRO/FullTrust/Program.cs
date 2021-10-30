@@ -11,11 +11,16 @@ namespace FullTrust
 {
     class Program
     {
+        //todo: get from settings?
+        private static string ApplicationDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Wifi QR Code Scanner PRO";
+
         static void Main(string[] args)
         {
+            Directory.CreateDirectory(ApplicationDataFolder);
             var result = get_Wifi_passwords();
-            File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\TESTINGYOO.txt", "lolo");
-            File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\pw.txt", result);
+
+            
+            File.WriteAllText(ApplicationDataFolder + "\\pw.txt", result);
             Console.Title = "Hello World";
             Console.WriteLine("This process has access to the entire public desktop API surface");
         }

@@ -28,6 +28,8 @@ using Wifi_QR_code_scanner;
 using System.Collections.ObjectModel;
 using WiFi_QR_Code_Scanner_PRO.Managers;
 using Windows.Foundation.Metadata;
+using System.IO;
+using Windows.Storage.Search;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -47,7 +49,13 @@ namespace WiFi_QR_Code_Scanner_PRO
 
         private string lastQrSSid { get; set; }
 
+        //todo change to proper data structure
+        private string StoredWifiData { get; set; }
 
+        private StorageFolder ApplicationDataFolder;
+
+        //todo: get from settings?
+        private const string ApplicationFolderName = "Wifi QR Code Scanner PRO";
 
         public MainPage()
         {
@@ -72,17 +80,9 @@ namespace WiFi_QR_Code_Scanner_PRO
             StoredCredentials.Add(new WifiAccessPointDataViewModel(new WifiAccessPointData(){password="pass2",ssid="ssid2" }));
             StoredCredentials.Add(new WifiAccessPointDataViewModel(new WifiAccessPointData(){password="pass3",ssid="ssid3" }));
             StoredCredentials.Add(new WifiAccessPointDataViewModel(new WifiAccessPointData(){password="pass4",ssid="ssid4" }));
-
-            //temp();
         }
 
-        static async void temp()
-        {
-            if (ApiInformation.IsApiContractPresent("Windows.ApplicationModel.FullTrustAppContract", 1, 0))
-            {
-                await FullTrustProcessLauncher.LaunchFullTrustProcessForCurrentAppAsync();
-            }
-        }
+
 
         static void CrashHandler(object sender, System.UnhandledExceptionEventArgs args)
         {
@@ -515,12 +515,39 @@ namespace WiFi_QR_Code_Scanner_PRO
         }
 
 
-        
+        private async void SetupApplicationDataFolderAndSubscribeChanges()
+        {
+            ApplicationDataFolder = await KnownFolders.DocumentsLibrary.CreateFolderAsync(ApplicationFolderName,CreationCollisionOption.OpenIfExists);
+            ApplicationDataFolder = await KnownFolders.DocumentsLibrary.GetFolderAsync(ApplicationFolderName);
+            List<string> fileTypeFilter = new List<string>();
+            fileTypeFilter.Add(".txt");
+            var fileQueryOptions = new QueryOptions(CommonFileQuery.OrderByName, fileTypeFilter);
+            var fileQuery = ApplicationDataFolder.CreateFileQueryWithOptions(fileQueryOptions);
+            //subscribe on query's ContentsChanged event
+            fileQuery.ContentsChanged += Query_ContentsChanged;
+            //trigger once needed for init
+            var files = await fileQuery.GetFilesAsync();
+        }
 
         private void BtnRefreshStoredCredentials_Click(object sender, RoutedEventArgs e)
         {
-            //var bla = StoredCredentialsManager.get_Wifi_passwords();
+            if(ApplicationDataFolder == null)
+            {
+                SetupApplicationDataFolderAndSubscribeChanges();
+            }
             StoredCredentialsManager.ExecuteCommandAsync();
+        }
+
+        private void Query_ContentsChanged(Windows.Storage.Search.IStorageQueryResultBase sender, object args)
+        {
+            LoadProfileDataFromFile();
+        }
+
+        private async void LoadProfileDataFromFile()
+        {
+            var applicationFolder = await KnownFolders.DocumentsLibrary.GetFolderAsync(ApplicationFolderName);
+            var file = await applicationFolder.GetFileAsync("pw.txt");
+            StoredWifiData = await Windows.Storage.FileIO.ReadTextAsync(file);
         }
         #endregion
 
