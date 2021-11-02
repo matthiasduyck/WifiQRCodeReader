@@ -30,6 +30,8 @@ using WiFi_QR_Code_Scanner_PRO.Managers;
 using Windows.Foundation.Metadata;
 using System.IO;
 using Windows.Storage.Search;
+using static WiFi_QR_Code_Scanner_PRO.Managers.StoredCredentialsManager;
+using System.Linq;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -40,6 +42,7 @@ namespace WiFi_QR_Code_Scanner_PRO
     {
         QRCameraManager cameraManager;
         WifiConnectionManager wifiConnectionManager;
+        StoredCredentialsManager storedCredentialsManager;
         BarcodeManager barcodeManager;
         System.Threading.Timer scanningTimer;
         CancellationTokenSource qrAnalyzerCancellationTokenSource;
@@ -49,13 +52,13 @@ namespace WiFi_QR_Code_Scanner_PRO
 
         private string lastQrSSid { get; set; }
 
-        //todo change to proper data structure
-        private string StoredWifiData { get; set; }
+        private List<WifiAccessPointData> StoredWifiData { get; set; }
 
         private StorageFolder ApplicationDataFolder;
-
         //todo: get from settings?
         private const string ApplicationFolderName = "Wifi QR Code Scanner PRO";
+
+
 
         public MainPage()
         {
@@ -67,7 +70,13 @@ namespace WiFi_QR_Code_Scanner_PRO
             QrCodeDecodedDelegate handler = new QrCodeDecodedDelegate(handleQRcodeFound);
             qrAnalyzerCancellationTokenSource = new CancellationTokenSource();
             cameraManager = new QRCameraManager(PreviewControl, Dispatcher, handler, qrAnalyzerCancellationTokenSource);
+
+            StoredCredentialsUpdateDelegate storedCredentialsUpdateDelegate = new StoredCredentialsUpdateDelegate(StoredCredentialsUpdateAsync);
+            storedCredentialsManager = new StoredCredentialsManager(storedCredentialsUpdateDelegate);
+
+
             wifiConnectionManager = new WifiConnectionManager();
+
             barcodeManager = new BarcodeManager();
             Application.Current.Suspending += Application_Suspending;
             Application.Current.Resuming += Current_Resuming;
@@ -76,10 +85,10 @@ namespace WiFi_QR_Code_Scanner_PRO
             StartScanningForNetworks();
 
             //TODO: temp
-            StoredCredentials.Add(new WifiAccessPointDataViewModel(new WifiAccessPointData(){password="pass",ssid="ssid" }));
-            StoredCredentials.Add(new WifiAccessPointDataViewModel(new WifiAccessPointData(){password="pass2",ssid="ssid2" }));
-            StoredCredentials.Add(new WifiAccessPointDataViewModel(new WifiAccessPointData(){password="pass3",ssid="ssid3" }));
-            StoredCredentials.Add(new WifiAccessPointDataViewModel(new WifiAccessPointData(){password="pass4",ssid="ssid4" }));
+            //StoredCredentials.Add(new WifiAccessPointDataViewModel(new WifiAccessPointData(){password="pass",ssid="ssid" }));
+            //StoredCredentials.Add(new WifiAccessPointDataViewModel(new WifiAccessPointData(){password="pass2",ssid="ssid2" }));
+            //StoredCredentials.Add(new WifiAccessPointDataViewModel(new WifiAccessPointData(){password="pass3",ssid="ssid3" }));
+            //StoredCredentials.Add(new WifiAccessPointDataViewModel(new WifiAccessPointData(){password="pass4",ssid="ssid4" }));
         }
 
 
@@ -351,7 +360,7 @@ namespace WiFi_QR_Code_Scanner_PRO
 
             var wifiQrString = WifiStringParser.createWifiString(wifiData);
 
-            //create image
+            //create image todo store in settings
             var options = new QrCodeEncodingOptions
             {
                 DisableECI = true,
@@ -512,48 +521,68 @@ namespace WiFi_QR_Code_Scanner_PRO
         public ObservableCollection<WifiAccessPointDataViewModel> StoredCredentials
         {
             get { return this._storedCredentials; }
+            set {
+                this._storedCredentials = value;
+            }
         }
 
 
-        private async void SetupApplicationDataFolderAndSubscribeChanges()
-        {
-            ApplicationDataFolder = await KnownFolders.DocumentsLibrary.CreateFolderAsync(ApplicationFolderName,CreationCollisionOption.OpenIfExists);
-            ApplicationDataFolder = await KnownFolders.DocumentsLibrary.GetFolderAsync(ApplicationFolderName);
-            List<string> fileTypeFilter = new List<string>();
-            fileTypeFilter.Add(".txt");
-            var fileQueryOptions = new QueryOptions(CommonFileQuery.OrderByName, fileTypeFilter);
-            var fileQuery = ApplicationDataFolder.CreateFileQueryWithOptions(fileQueryOptions);
-            //subscribe on query's ContentsChanged event
-            fileQuery.ContentsChanged += Query_ContentsChanged;
-            //trigger once needed for init
-            var files = await fileQuery.GetFilesAsync();
-        }
+        
 
         private void BtnRefreshStoredCredentials_Click(object sender, RoutedEventArgs e)
         {
-            if(ApplicationDataFolder == null)
+            if (ApiInformation.IsApiContractPresent("Windows.ApplicationModel.FullTrustAppContract", 1, 0))
             {
-                SetupApplicationDataFolderAndSubscribeChanges();
+                storedCredentialsManager.UpdateStoredCredentials();
             }
-            StoredCredentialsManager.ExecuteCommandAsync();
+            else
+            {
+                //todo show error in UI.
+            }
         }
 
-        private void Query_ContentsChanged(Windows.Storage.Search.IStorageQueryResultBase sender, object args)
+
+        public async void StoredCredentialsUpdateAsync(List<WifiAccessPointData> accessPointData)
         {
-            LoadProfileDataFromFile();
+            var accessPointViewData = accessPointData.Select(x => new WifiAccessPointDataViewModel(x));
+            ObservableCollection<WifiAccessPointDataViewModel> observableCollectionWifiData = new ObservableCollection<WifiAccessPointDataViewModel>(accessPointViewData);
+
+            await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+            () =>
+            {
+                ContactsLV.ItemsSource = observableCollectionWifiData;
+            }
+            );
         }
 
-        private async void LoadProfileDataFromFile()
-        {
-            var applicationFolder = await KnownFolders.DocumentsLibrary.GetFolderAsync(ApplicationFolderName);
-            var file = await applicationFolder.GetFileAsync("pw.txt");
-            StoredWifiData = await Windows.Storage.FileIO.ReadTextAsync(file);
-        }
+        
         #endregion
 
         private void BtnGenerateStoredWifiQRCode_Click(object sender, RoutedEventArgs e)
         {
+            var networkToGenerateQRCodeFor = ((Windows.UI.Xaml.FrameworkElement)sender).DataContext as WifiAccessPointDataViewModel;
+            var wifiQrString = WifiStringParser.createWifiString(networkToGenerateQRCodeFor.AccessPointData);
 
+            //create image todo store in settings
+            var options = new QrCodeEncodingOptions
+            {
+                DisableECI = true,
+                CharacterSet = "UTF-8",
+                Width = 512,
+                Height = 512,
+            };
+            var qr = new ZXing.BarcodeWriter();
+            qr.Options = options;
+            qr.Format = ZXing.BarcodeFormat.QR_CODE;
+            var result = qr.Write(wifiQrString);
+            //set as source
+            this.imgQrCodeFromStoredNetwork.Source = result;
+            this.qrCodeFromStoredNetwork.Visibility = Visibility.Visible;
+        }
+
+        private void BtnCloseQrCodeFromStoredNetwork_Click(object sender, RoutedEventArgs e)
+        {
+            this.qrCodeFromStoredNetwork.Visibility = Visibility.Collapsed;
         }
     }
 

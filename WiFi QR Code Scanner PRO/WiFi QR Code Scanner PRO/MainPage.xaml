@@ -74,41 +74,55 @@
                 </ScrollViewer>
             </PivotItem>
             <PivotItem Header="Share Passwords">
-                <ScrollViewer VerticalScrollBarVisibility="Visible">
-                    <Grid Margin="20,20,20,20">
-                        <Button VerticalAlignment="Top" Name="btnRefreshStoredCredentials" Click="BtnRefreshStoredCredentials_Click">Refresh stored networks</Button>
-                        <CheckBox VerticalAlignment="Top" HorizontalAlignment="Right" Content="Show passwords as plain text"/>
-                        <ListView Margin="0,60,0,0" x:Name="ContactsLV" ItemsSource="{x:Bind StoredCredentials}">
-                            <ListView.ItemContainerStyle>
-                                <Style TargetType="ListViewItem">
-                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                                </Style>
-                            </ListView.ItemContainerStyle>
-                            <ListView.ItemTemplate>
-                                <DataTemplate x:DataType="local:WifiAccessPointDataViewModel" >
-                                    <Grid Margin="0,0,0,0">
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="*"/>
-                                            <RowDefinition Height="*"/>
-                                        </Grid.RowDefinitions>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" Text="{x:Bind DisplaySsid}" Margin="0,6,0,0" 
+                <Grid>
+                    <ScrollViewer VerticalScrollBarVisibility="Visible">
+                        <Grid Margin="20,20,20,20">
+                            <Button VerticalAlignment="Top" Name="btnRefreshStoredCredentials" Click="BtnRefreshStoredCredentials_Click">Refresh stored networks</Button>
+                            <!--<CheckBox VerticalAlignment="Top" HorizontalAlignment="Right" Content="Show passwords as plain text"/>-->
+                            <ListView Margin="0,60,0,0" x:Name="ContactsLV" ItemsSource="{x:Bind StoredCredentials}">
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+                                <ListView.ItemTemplate>
+                                    <DataTemplate x:DataType="local:WifiAccessPointDataViewModel" >
+                                        <Grid Margin="0,0,0,0">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="*"/>
+                                                <RowDefinition Height="*"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{x:Bind DisplaySsid}" Margin="0,6,0,0" 
                     Style="{ThemeResource BaseTextBlockStyle}"/>
-                                        <TextBlock  Grid.Column="0" Grid.Row="1" Text="{x:Bind DisplayPassword}" Margin="0,0,0,6" 
+                                            <TextBlock  Grid.Column="0" Grid.Row="1" Text="{x:Bind DisplayPassword}" Margin="0,0,0,6" 
                     Style="{ThemeResource BodyTextBlockStyle}"/>
-                                        <Grid Grid.RowSpan="2" Grid.Column="1">
-                                            <Button Name="btnGenerateStoredWifiQRCode" Click="BtnGenerateStoredWifiQRCode_Click" HorizontalAlignment="Right">Generate QR Code</Button>
+                                            <Grid Grid.RowSpan="2" Grid.Column="1">
+                                                <Button Name="btnGenerateStoredWifiQRCode" Click="BtnGenerateStoredWifiQRCode_Click" HorizontalAlignment="Right">Details + QR</Button>
+                                            </Grid>
+
                                         </Grid>
-                                        
-                                    </Grid>
-                                </DataTemplate>
-                            </ListView.ItemTemplate>
-                        </ListView>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+
+                        </Grid>
+                    </ScrollViewer>
+                    <Grid Name="qrCodeFromStoredNetwork" VerticalAlignment="Bottom" Margin="-10,20,-10,0" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" BorderBrush="Gray" BorderThickness="0,1,0,0">
+                        <Button Name="btnCloseQrCodeFromStoredNetwork" Content="Close Details" Margin="8" VerticalAlignment="Top" HorizontalAlignment="Center" Click="BtnCloseQrCodeFromStoredNetwork_Click"/>
+                        <Image Name="imgQrCodeFromStoredNetwork" VerticalAlignment="Bottom" Height="200" Width="200" HorizontalAlignment="Left" Margin="48,48,0,48"></Image>
+                        <Grid Margin="268,48,0,48">
+                            <TextBox Name="txtNetworkNameFromStoredNetwork" MaxWidth="200" VerticalAlignment="Top" HorizontalAlignment="Left" Height="32" Margin="0,0,0,0" PlaceholderText="SampleWifiNetwork"></TextBox>
+                            <TextBox Name="txtNetworkPasswordFromStoredNetwork" MaxWidth="200" VerticalAlignment="Top" HorizontalAlignment="Left" Height="32" Margin="0,42,0,0" PlaceholderText="SampleWifiNetwork"></TextBox>
+                            
+                            <Button Name="btnSaveQrCodeImageFromStoredNetwork" VerticalAlignment="Bottom">Save QR Code</Button>
+                        </Grid>
+                        
                     </Grid>
-                </ScrollViewer>
+                </Grid>
             </PivotItem>
         </Pivot>
     </Grid>

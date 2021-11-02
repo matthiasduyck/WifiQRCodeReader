@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using Wifi_QR_code_scanner.Business;
 
 namespace FullTrust
 {
@@ -16,13 +17,15 @@ namespace FullTrust
 
         static void Main(string[] args)
         {
+            //This should not be needed as the UWP side should have done this already.
             Directory.CreateDirectory(ApplicationDataFolder);
-            var result = get_Wifi_passwords();
+            var allWifiData = getWifiData();
+            var serializedWifiData = Newtonsoft.Json.JsonConvert.SerializeObject(allWifiData);
 
-            
-            File.WriteAllText(ApplicationDataFolder + "\\pw.txt", result);
-            Console.Title = "Hello World";
-            Console.WriteLine("This process has access to the entire public desktop API surface");
+
+            File.WriteAllText(ApplicationDataFolder + "\\wifidata.json", serializedWifiData);
+            //Console.Title = "Hello World";
+            //Console.WriteLine("This process has access to the entire public desktop API surface");
         }
 
         private static string GetWifiNetworks()
@@ -46,10 +49,10 @@ namespace FullTrust
             return output;
         }
 
-        private static string ReadPassword(string Wifi_Name)
+        private static string ReadProfileData(string WifiProfileName)
         {
 
-            string argument = "wlan show profile name=\"" + Wifi_Name + "\" key=clear";
+            string argument = "wlan show profile name=\"" + WifiProfileName + "\" key=clear";
             Process processWifi = new Process();
             processWifi.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
             processWifi.StartInfo.FileName = "netsh";
@@ -69,31 +72,39 @@ namespace FullTrust
             return output;
         }
 
-        private static string GetWifiPassword(string Wifi_Name)
+        private static KeyValuePair<string, string> GetWifiPassword(string Wifi_Name)
         {
-            string get_password = ReadPassword(Wifi_Name);
-            using (StringReader reader = new StringReader(get_password))
+            string wifiProfileData = ReadProfileData(Wifi_Name);
+            string wifiPassword = null;
+            string authenticationString = null;
+            using (StringReader reader = new StringReader(wifiProfileData))
             {
                 string line;
                 while ((line = reader.ReadLine()) != null)
                 {
-                    Regex regex2 = new Regex(@"Key Content * : (?<after>.*)");
-                    Match match2 = regex2.Match(line);
+                    Regex keyContentDataRegex = new Regex(@"Key Content * : (?<after>.*)");
+                    Regex authenticationModeRegex = new Regex(@"Authentication * : (?<after>.*)");
 
-                    if (match2.Success)
+                    Match keyContentDataRegexMatch = keyContentDataRegex.Match(line);
+                    Match authenticationModeRegexMatch = authenticationModeRegex.Match(line);
+
+                    if (keyContentDataRegexMatch.Success)
                     {
-                        string current_password = match2.Groups["after"].Value;
-                        return current_password;
+                        wifiPassword = keyContentDataRegexMatch.Groups["after"].Value;
+                    }
+                    else if (authenticationModeRegexMatch.Success)
+                    {
+                        authenticationString = authenticationModeRegexMatch.Groups["after"].Value;
                     }
                 }
             }
-            return "Open Network - NO PASSWORD";
+            return new KeyValuePair<string, string>(authenticationString, wifiPassword);
         }
 
         // main Method 
-        private static string get_Wifi_passwords()
+        private static List<WifiAccessPointData> getWifiData()
         {
-            var result = "";
+            var result = new List<WifiAccessPointData>();
             string WifiNetworks = GetWifiNetworks();
             using (StringReader reader = new StringReader(WifiNetworks))
             {
@@ -109,15 +120,18 @@ namespace FullTrust
                     {
                         //Wifi_count_names++;
                         string Wifi_name = match1.Groups["after"].Value;
-                        string Wifi_password = GetWifiPassword(Wifi_name);
-                        result += Environment.NewLine;
-                        result += Wifi_name + Wifi_password;
-                        //listView1.Items.Add(Wifi_name).SubItems.Add(Wifi_password);
+                        var wifiAuthenticationData = GetWifiPassword(Wifi_name);
+                        string Wifi_password = wifiAuthenticationData.Value;
+                        WifiAccessPointSecurity wifiAccessPointSecurity = wifiAuthenticationData.Key.Contains("WPA") ? WifiAccessPointSecurity.WPA : WifiAccessPointSecurity.WEP;
+                        if (string.IsNullOrEmpty(Wifi_password))
+                        {
+                            wifiAccessPointSecurity = WifiAccessPointSecurity.nopass;
+                        }
+                        result.Add(new WifiAccessPointData() { ssid = Wifi_name, password=Wifi_password, wifiAccessPointSecurity = wifiAccessPointSecurity });
                     }
                 }
             }
             return result;
-
         }
     }
 }
