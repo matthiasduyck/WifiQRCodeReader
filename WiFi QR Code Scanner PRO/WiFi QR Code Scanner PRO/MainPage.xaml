@@ -77,7 +77,7 @@
                 <Grid>
                     <ScrollViewer VerticalScrollBarVisibility="Visible">
                         <Grid Margin="20,20,20,20">
-                            <Button VerticalAlignment="Top" Name="btnRefreshStoredCredentials" Click="BtnRefreshStoredCredentials_Click">Refresh stored networks</Button>
+                            <Button VerticalAlignment="Top" Name="btnRefreshStoredCredentials" Click="BtnRefreshStoredCredentials_Click">Load/Refresh stored WiFi networks</Button>
                             <!--<CheckBox VerticalAlignment="Top" HorizontalAlignment="Right" Content="Show passwords as plain text"/>-->
                             <ListView Margin="0,60,0,0" x:Name="ContactsLV" ItemsSource="{x:Bind StoredCredentials}">
                                 <ListView.ItemContainerStyle>
@@ -101,7 +101,7 @@
                                             <TextBlock  Grid.Column="0" Grid.Row="1" Text="{x:Bind DisplayPassword}" Margin="0,0,0,6" 
                     Style="{ThemeResource BodyTextBlockStyle}"/>
                                             <Grid Grid.RowSpan="2" Grid.Column="1">
-                                                <Button Name="btnGenerateStoredWifiQRCode" Click="BtnGenerateStoredWifiQRCode_Click" HorizontalAlignment="Right">Details + QR</Button>
+                                                <Button Name="btnGenerateStoredWifiQRCode" Click="BtnShowStoredWifiData_Click" HorizontalAlignment="Right">Details + QR</Button>
                                             </Grid>
 
                                         </Grid>
@@ -111,14 +111,22 @@
 
                         </Grid>
                     </ScrollViewer>
-                    <Grid Name="qrCodeFromStoredNetwork" VerticalAlignment="Bottom" Margin="-10,20,-10,0" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" BorderBrush="Gray" BorderThickness="0,1,0,0">
+                    <Grid Visibility="Collapsed" Name="qrCodeFromStoredNetwork" VerticalAlignment="Bottom" Margin="-10,20,-10,0" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" BorderBrush="Gray" BorderThickness="0,1,0,0">
                         <Button Name="btnCloseQrCodeFromStoredNetwork" Content="Close Details" Margin="8" VerticalAlignment="Top" HorizontalAlignment="Center" Click="BtnCloseQrCodeFromStoredNetwork_Click"/>
                         <Image Name="imgQrCodeFromStoredNetwork" VerticalAlignment="Bottom" Height="200" Width="200" HorizontalAlignment="Left" Margin="48,48,0,48"></Image>
                         <Grid Margin="268,48,0,48">
-                            <TextBox Name="txtNetworkNameFromStoredNetwork" MaxWidth="200" VerticalAlignment="Top" HorizontalAlignment="Left" Height="32" Margin="0,0,0,0" PlaceholderText="SampleWifiNetwork"></TextBox>
-                            <TextBox Name="txtNetworkPasswordFromStoredNetwork" MaxWidth="200" VerticalAlignment="Top" HorizontalAlignment="Left" Height="32" Margin="0,42,0,0" PlaceholderText="SampleWifiNetwork"></TextBox>
-                            
-                            <Button Name="btnSaveQrCodeImageFromStoredNetwork" VerticalAlignment="Bottom">Save QR Code</Button>
+                            <TextBlock VerticalAlignment="Top" Height="23" Text="WiFi Network Name:" FontWeight="Bold"/>
+                            <TextBlock Name="txtSSIDFromStoredNetwork" VerticalAlignment="Top" Height="20" Margin="0,20,0,0" Text="SampleWifiNetwork" HorizontalAlignment="Left"></TextBlock>
+
+                            <TextBlock VerticalAlignment="Top" Height="23" Margin="0,45,0,0" Text="Password:" FontWeight="Bold"/>
+                            <TextBlock Name="txtPasswordFromStoredNetwork" VerticalAlignment="Top" Height="20" Margin="0,65,0,0" Text="**********" HorizontalAlignment="Left"></TextBlock>
+
+                            <TextBlock VerticalAlignment="Top" Height="23" Margin="0,90,0,0" Text="Authentication Type:" FontWeight="Bold"/>
+                            <TextBlock Name="txtAuthenticationTypeFromStoredNetwork" VerticalAlignment="Top" Height="20" Margin="0,110,0,0" Text="Unknown"/>
+
+                            <Button Name="btnSaveQrCodeImageFromStoredNetwork" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="130" Margin="0,0,0,0" Click="BtnSaveQrCodeImageFromStoredNetwork_Click">Save QR Code</Button>
+                            <Button Name="btnCopyNetworkNameFromStoredNetwork" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="130" Margin="140,0,0,0" Click="BtnCopyNetworkNameFromStoredNetwork_Click">Copy Network</Button>
+                            <Button Name="btnCopyPasswordFromStoredNetwork" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="130" Margin="280,0,0,0" Click="BtnCopyPasswordFromStoredNetwork_Click">Copy Password</Button>
                         </Grid>
                         
                     </Grid>

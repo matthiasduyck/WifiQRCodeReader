@@ -379,16 +379,21 @@ namespace WiFi_QR_Code_Scanner_PRO
             this.btnSaveFile.Visibility = Visibility.Visible;
         }
 
-        private async void BtnSaveFile_Click(object sender, RoutedEventArgs e)
+        private void BtnSaveFile_Click(object sender, RoutedEventArgs e)
+        {
+            SaveQRFile(this.imgQrCode);//todo push to legacy mainpage
+        }
+
+        private async void SaveQRFile(Image imageControl)
         {
             var _bitmap = new RenderTargetBitmap();
             //verify they are filled in
-            if (this.imgQrCode.Source == null)
+            if (imageControl.Source == null)
             {
                 MessageManager.ShowMessageToUserAsync("No image to save, please generate one first.");
                 return;
             }
-            await _bitmap.RenderAsync(this.imgQrCode);    //-----> This is my ImageControl.
+            await _bitmap.RenderAsync(imageControl);    //-----> This is my ImageControl.
 
             var savePicker = new FileSavePicker();
             savePicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
@@ -558,7 +563,7 @@ namespace WiFi_QR_Code_Scanner_PRO
         
         #endregion
 
-        private void BtnGenerateStoredWifiQRCode_Click(object sender, RoutedEventArgs e)
+        private void BtnShowStoredWifiData_Click(object sender, RoutedEventArgs e)
         {
             var networkToGenerateQRCodeFor = ((Windows.UI.Xaml.FrameworkElement)sender).DataContext as WifiAccessPointDataViewModel;
             var wifiQrString = WifiStringParser.createWifiString(networkToGenerateQRCodeFor.AccessPointData);
@@ -578,11 +583,35 @@ namespace WiFi_QR_Code_Scanner_PRO
             //set as source
             this.imgQrCodeFromStoredNetwork.Source = result;
             this.qrCodeFromStoredNetwork.Visibility = Visibility.Visible;
+
+            //do the text stuff
+            this.txtAuthenticationTypeFromStoredNetwork.Text = networkToGenerateQRCodeFor.AccessPointData.wifiAccessPointSecurity.ToString();
+            this.txtPasswordFromStoredNetwork.Text = !string.IsNullOrEmpty(networkToGenerateQRCodeFor.AccessPointData.password) ? networkToGenerateQRCodeFor.AccessPointData.password : "No password";
+            this.txtSSIDFromStoredNetwork.Text = networkToGenerateQRCodeFor.AccessPointData.ssid;
         }
 
         private void BtnCloseQrCodeFromStoredNetwork_Click(object sender, RoutedEventArgs e)
         {
             this.qrCodeFromStoredNetwork.Visibility = Visibility.Collapsed;
+        }
+
+        private void BtnSaveQrCodeImageFromStoredNetwork_Click(object sender, RoutedEventArgs e)
+        {
+            SaveQRFile(this.imgQrCodeFromStoredNetwork);
+        }
+
+        private void BtnCopyNetworkNameFromStoredNetwork_Click(object sender, RoutedEventArgs e)
+        {
+            var dataPackage = new DataPackage();
+            dataPackage.SetText(this.txtSSIDFromStoredNetwork.Text);
+            Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(dataPackage);
+        }
+
+        private void BtnCopyPasswordFromStoredNetwork_Click(object sender, RoutedEventArgs e)
+        {
+            var dataPackage = new DataPackage();
+            dataPackage.SetText(this.txtPasswordFromStoredNetwork.Text);
+            Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(dataPackage);
         }
     }
 
