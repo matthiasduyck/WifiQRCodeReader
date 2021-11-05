@@ -77,7 +77,7 @@
                 <Grid>
                     <ScrollViewer VerticalScrollBarVisibility="Visible">
                         <Grid Margin="20,20,20,20">
-                            <Button VerticalAlignment="Top" Name="btnRefreshStoredCredentials" Click="BtnRefreshStoredCredentials_Click">Load/Refresh stored WiFi networks</Button>
+                            <Button VerticalAlignment="Top" Name="btnRefreshStoredCredentials" Click="BtnRefreshStoredCredentials_Click">Load/Refresh WiFi networks</Button>
                             <!--<CheckBox VerticalAlignment="Top" HorizontalAlignment="Right" Content="Show passwords as plain text"/>-->
                             <ListView Margin="0,60,0,0" x:Name="ContactsLV" ItemsSource="{x:Bind StoredCredentials}">
                                 <ListView.ItemContainerStyle>
@@ -101,7 +101,8 @@
                                             <TextBlock  Grid.Column="0" Grid.Row="1" Text="{x:Bind DisplayPassword}" Margin="0,0,0,6" 
                     Style="{ThemeResource BodyTextBlockStyle}"/>
                                             <Grid Grid.RowSpan="2" Grid.Column="1">
-                                                <Button Name="btnGenerateStoredWifiQRCode" Click="BtnShowStoredWifiData_Click" HorizontalAlignment="Right">Details + QR</Button>
+                                                <Button Name="btnGenerateStoredWifiQRCode" Click="BtnShowStoredWifiData_Click" HorizontalAlignment="Right">View Details + QR</Button>
+                                                <!--<HyperlinkButton Name="btnGenerateStoredWifiQRCode" Click="BtnShowStoredWifiData_Click" HorizontalAlignment="Right">View Details + QR</HyperlinkButton>-->
                                             </Grid>
 
                                         </Grid>
