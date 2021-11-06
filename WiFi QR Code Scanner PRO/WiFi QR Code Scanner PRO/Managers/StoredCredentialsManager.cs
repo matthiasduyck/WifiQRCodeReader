@@ -35,6 +35,8 @@ using Windows.ApplicationModel.Core;
 using Windows.UI;
 using Windows.Storage.Search;
 using System.Collections.ObjectModel;
+using WiFi_QR_Code_Scanner_PRO.Business;
+using System.Xml.Serialization;
 
 namespace WiFi_QR_Code_Scanner_PRO.Managers
 {
@@ -46,6 +48,8 @@ namespace WiFi_QR_Code_Scanner_PRO.Managers
         private StorageFolder ApplicationDataFolder;
         //todo: get from settings?
         private const string ApplicationFolderName = "Wifi QR Code Scanner PRO";
+
+        private StorageFileQueryResult profileFileQuery;
 
         StoredCredentialsUpdateDelegate StoredCredentialsUpdateDelegate { get; set; }
 
@@ -73,28 +77,70 @@ namespace WiFi_QR_Code_Scanner_PRO.Managers
             ApplicationDataFolder = await KnownFolders.DocumentsLibrary.CreateFolderAsync(ApplicationFolderName, CreationCollisionOption.OpenIfExists);
             ApplicationDataFolder = await KnownFolders.DocumentsLibrary.GetFolderAsync(ApplicationFolderName);
             List<string> fileTypeFilter = new List<string>();
-            fileTypeFilter.Add(".json");
+            fileTypeFilter.Add(".xml");
             var fileQueryOptions = new QueryOptions(CommonFileQuery.OrderByName, fileTypeFilter);
-            var fileQuery = ApplicationDataFolder.CreateFileQueryWithOptions(fileQueryOptions);
+            profileFileQuery = ApplicationDataFolder.CreateFileQueryWithOptions(fileQueryOptions);
             //subscribe on query's ContentsChanged event
-            fileQuery.ContentsChanged += Query_ContentsChanged;
+            profileFileQuery.ContentsChanged += Query_ContentsChanged;
             //trigger once needed for init
-            var files = await fileQuery.GetFilesAsync();
+            var files = await profileFileQuery.GetFilesAsync();
         }
 
         private void Query_ContentsChanged(Windows.Storage.Search.IStorageQueryResultBase sender, object args)
         {
-            LoadProfileDataFromFile();
+            LoadProfileDataFromFiles();
         }
 
-        private async void LoadProfileDataFromFile()
+        private async void LoadProfileDataFromFiles()
         {
-            var applicationFolder = await KnownFolders.DocumentsLibrary.GetFolderAsync(ApplicationFolderName);
-            //todo get filename from shared const
-            var wifiDataFile = await applicationFolder.GetFileAsync("wifidata.json");
-            var serializedWifiData = await Windows.Storage.FileIO.ReadTextAsync(wifiDataFile);
-            var allWifiData = Newtonsoft.Json.JsonConvert.DeserializeObject<List<WifiAccessPointData>>(serializedWifiData);
-            this.StoredCredentialsUpdateDelegate(allWifiData);
+            var files = await profileFileQuery.GetFilesAsync();
+            XmlSerializer serializer = new XmlSerializer(typeof(WLANProfile));
+            var result = new List<WifiAccessPointData>();
+            foreach (var file in files)
+            {
+                var wifiProfileData = await Windows.Storage.FileIO.ReadTextAsync(file);
+
+                using (StringReader reader = new StringReader(wifiProfileData))
+                {
+                    try
+                    {
+                        var wlanProfile = (WLANProfile)serializer.Deserialize(reader);
+                        result.Add(MapWLANProfileToWifiAccessPointData(wlanProfile));
+                    }
+                    catch(Exception e)
+                    {
+
+                    }
+                    
+                    
+                }
+            }
+
+            this.StoredCredentialsUpdateDelegate(result);
+        }
+
+        private WifiAccessPointData MapWLANProfileToWifiAccessPointData(WLANProfile wlanProfile)
+        {
+            var result = new WifiAccessPointData()
+            {
+                password = wlanProfile.MSM.Security.SharedKey !=null && !wlanProfile.MSM.Security.AuthEncryption.Authentication.Contains("open") ? wlanProfile.MSM.Security.SharedKey.KeyMaterial : "",
+                ssid = wlanProfile.SSIDConfig.SSID.Name
+            };
+
+            if (wlanProfile.MSM.Security.AuthEncryption.Authentication.Contains("open"))
+            {
+                result.wifiAccessPointSecurity = WifiAccessPointSecurity.nopass;
+            }
+            else if (wlanProfile.MSM.Security.AuthEncryption.Authentication.Contains("WPA"))
+            {
+                result.wifiAccessPointSecurity = WifiAccessPointSecurity.WPA;
+            }
+            else
+            {
+                result.wifiAccessPointSecurity = WifiAccessPointSecurity.WEP;
+            }
+
+            return result;
         }
     }
 }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Wifi_QR_code_scanner.Business;
+using System.Security.Cryptography;
 
 namespace FullTrust
 {
@@ -19,13 +20,68 @@ namespace FullTrust
         {
             //This should not be needed as the UWP side should have done this already.
             Directory.CreateDirectory(ApplicationDataFolder);
-            var allWifiData = getWifiData();
-            var serializedWifiData = Newtonsoft.Json.JsonConvert.SerializeObject(allWifiData);
+            ExportWifiProfilesAsXML();
+            //var allWifiData = getWifiData();
+            //var serializedWifiData = Newtonsoft.Json.JsonConvert.SerializeObject(allWifiData);
 
 
-            File.WriteAllText(ApplicationDataFolder + "\\wifidata.json", serializedWifiData);
+            //File.WriteAllText(ApplicationDataFolder + "\\wifidata.json", serializedWifiData);
             //Console.Title = "Hello World";
             //Console.WriteLine("This process has access to the entire public desktop API surface");
+        }
+
+        //private static void Alternative()
+        //{
+        //    var blo = ManagedNativeWifi.NativeWifi.EnumerateProfiles().ToList();
+        //}
+
+        private static void ExportWifiProfilesAsXML()
+        {
+            //netsh wlan export profile key=clear folder="%UserProfile%\Desktop"
+            //execute the netsh command using process class
+            Process processWifi = new Process();
+            processWifi.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            processWifi.StartInfo.FileName = "netsh";
+            processWifi.StartInfo.Arguments = "wlan export profile key=clear folder=\""+ApplicationDataFolder+"\"";
+
+            processWifi.StartInfo.UseShellExecute = false;
+            processWifi.StartInfo.RedirectStandardError = true;
+            processWifi.StartInfo.RedirectStandardInput = true;
+            processWifi.StartInfo.RedirectStandardOutput = true;
+            processWifi.StartInfo.CreateNoWindow = true;
+            processWifi.Start();
+
+            string output = processWifi.StandardOutput.ReadToEnd();
+
+            processWifi.WaitForExit();
+        }
+
+        private static string decodePassword(string hexEncodedPassword)
+        {
+            try
+            {
+                // Convert to a byte array
+                byte[] passwordByteArray = StringToByteArray(hexEncodedPassword);
+
+                // Decrypt byte array
+                byte[] unprotectedBytes = ProtectedData.Unprotect(passwordByteArray, null, DataProtectionScope.LocalMachine);
+
+                return Encoding.ASCII.GetString(unprotectedBytes);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            return "";
+        }
+
+        public static byte[] StringToByteArray(String hex)
+        {
+            int NumberChars = hex.Length;
+            byte[] bytes = new byte[NumberChars / 2];
+            for (int i = 0; i < NumberChars; i += 2)
+                bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
+            return bytes;
         }
 
         private static string GetWifiNetworks()
