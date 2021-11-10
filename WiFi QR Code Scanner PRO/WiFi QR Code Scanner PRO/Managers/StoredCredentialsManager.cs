@@ -37,6 +37,7 @@ using Windows.Storage.Search;
 using System.Collections.ObjectModel;
 using WiFi_QR_Code_Scanner_PRO.Business;
 using System.Xml.Serialization;
+using Wifi_QR_code_scanner;
 
 namespace WiFi_QR_Code_Scanner_PRO.Managers
 {
@@ -46,8 +47,8 @@ namespace WiFi_QR_Code_Scanner_PRO.Managers
     {
         
         private StorageFolder ApplicationDataFolder;
-        //todo: get from settings?
-        private const string ApplicationFolderName = "Wifi QR Code Scanner PRO";
+
+        private const string ApplicationFolderName = ApplicationSettings.WiFiQRCodeScannerPROFolderName;
 
         private StorageFileQueryResult profileFileQuery;
 

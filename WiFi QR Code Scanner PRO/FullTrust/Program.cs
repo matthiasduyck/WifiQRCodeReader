@@ -8,26 +8,21 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Wifi_QR_code_scanner.Business;
 using System.Security.Cryptography;
+using Wifi_QR_code_scanner;
 
 namespace FullTrust
 {
     class Program
     {
-        //todo: get from settings?
-        private static string ApplicationDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Wifi QR Code Scanner PRO";
+        private static string ApplicationDataFolder = ApplicationSettings.WiFiQRCodeScannerPROFolder;
 
         static void Main(string[] args)
         {
             //This should not be needed as the UWP side should have done this already.
             Directory.CreateDirectory(ApplicationDataFolder);
             ExportWifiProfilesAsXML();
-            //var allWifiData = getWifiData();
-            //var serializedWifiData = Newtonsoft.Json.JsonConvert.SerializeObject(allWifiData);
-
 
             //File.WriteAllText(ApplicationDataFolder + "\\wifidata.json", serializedWifiData);
-            //Console.Title = "Hello World";
-            //Console.WriteLine("This process has access to the entire public desktop API surface");
         }
 
         //private static void Alternative()

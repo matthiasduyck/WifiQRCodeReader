@@ -65,6 +65,17 @@ namespace Wifi_QR_code_scanner
             this.donateLnkOpen.NavigateUri = new Uri("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=MSU2BD59P7442&source=url");            
         }
 
+        private QrCodeEncodingOptions GetQREncodingOptions {
+            get {
+                return new QrCodeEncodingOptions
+                {
+                    DisableECI = true,
+                    CharacterSet = "UTF-8",
+                    Width = 512,
+                    Height = 512,
+                };
+            }
+        }
         static void CrashHandler(object sender, System.UnhandledExceptionEventArgs args)
         {
             Exception e = (Exception)args.ExceptionObject;
@@ -297,7 +308,7 @@ namespace Wifi_QR_code_scanner
             var ssid = this.txtSSID.Text;
             var password = this.txtPass.Text;
             var security = ((ComboBoxItem)cmbSecurity.SelectedItem).Content.ToString();
-            var hidden = chckHidden.IsChecked??false;
+            var hidden = chckHidden.IsChecked ?? false;
             //verify they are filled in
             if (string.IsNullOrEmpty(ssid))
             {
@@ -313,11 +324,11 @@ namespace Wifi_QR_code_scanner
             {
                 wifiData.wifiAccessPointSecurity = WifiAccessPointSecurity.WEP;
             }
-            else if (security == "WPA" || security== "WPA2 (default)")
+            else if (security == "WPA" || security == "WPA2 (default)")
             {
                 wifiData.wifiAccessPointSecurity = WifiAccessPointSecurity.WPA;
             }
-            else if (security=="None")
+            else if (security == "None")
             {
                 wifiData.wifiAccessPointSecurity = WifiAccessPointSecurity.nopass;
             }
@@ -333,13 +344,7 @@ namespace Wifi_QR_code_scanner
             var wifiQrString = WifiStringParser.createWifiString(wifiData);
 
             //create image
-            var options = new QrCodeEncodingOptions
-            {
-                DisableECI = true,
-                CharacterSet = "UTF-8",
-                Width = 512,
-                Height = 512,
-            };
+            var options = GetQREncodingOptions;
             var qr = new ZXing.BarcodeWriter();
             qr.Options = options;
             qr.Format = ZXing.BarcodeFormat.QR_CODE;
@@ -351,21 +356,26 @@ namespace Wifi_QR_code_scanner
             this.btnSaveFile.Visibility = Visibility.Visible;
         }
 
-        private async void BtnSaveFile_Click(object sender, RoutedEventArgs e)
+        private void BtnSaveFile_Click(object sender, RoutedEventArgs e)
+        {
+            SaveQRFile(this.imgQrCode);
+        }
+
+        private async void SaveQRFile(Image imageControl)
         {
             var _bitmap = new RenderTargetBitmap();
             //verify they are filled in
-            if (this.imgQrCode.Source ==null)
+            if (imageControl.Source == null)
             {
                 MessageManager.ShowMessageToUserAsync("No image to save, please generate one first.");
                 return;
             }
-            await _bitmap.RenderAsync(this.imgQrCode);    //-----> This is my ImageControl.
+            await _bitmap.RenderAsync(imageControl);    //-----> This is my ImageControl.
 
             var savePicker = new FileSavePicker();
             savePicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
             savePicker.FileTypeChoices.Add("Image", new List<string>() { ".jpg" });
-            savePicker.SuggestedFileName = "QRCodeImage_" + this.lastQrSSid + "_" + DateTime.Now.ToString("yyyyMMddhhmmss"); //todo add ssid name
+            savePicker.SuggestedFileName = "QRCodeImage_" + this.lastQrSSid + "_" + DateTime.Now.ToString("yyyyMMddhhmmss");
             StorageFile savefile = await savePicker.PickSaveFileAsync();
             if (savefile == null)
                 return;
@@ -394,7 +404,7 @@ namespace Wifi_QR_code_scanner
             var selected = cmbCameraSelect.SelectedItem;
             if (cameraManager != null && cameraManager.ScanForQRcodes == true && selected is ComboboxItem)
             {
-                
+
                 //stop cam
                 cameraManager.ScanForQRcodes = false;
                 try
@@ -465,10 +475,10 @@ namespace Wifi_QR_code_scanner
                         var QRcodeResult = barcodeManager.DecodeBarcodeImage(softwareBitmap);
                         handleQRcodeFound(QRcodeResult);
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         MessageDialog msgbox = new MessageDialog("An error occurred: " + ex.Message);
-                    }                   
+                    }
                 }
             }
             else

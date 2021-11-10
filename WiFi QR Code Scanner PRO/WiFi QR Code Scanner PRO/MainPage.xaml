@@ -75,18 +75,18 @@
             </PivotItem>
             <PivotItem Header="Load Stored Profiles">
                 <Grid>
+                    <ProgressRing Name="proLoadStoredProfiles" Visibility="Collapsed" IsActive="False" Width="40" Height="40" />
                     <ScrollViewer VerticalScrollBarVisibility="Visible">
                         <Grid Margin="20,20,20,20">
                             <Button VerticalAlignment="Top" Name="btnRefreshStoredCredentials" Click="BtnRefreshStoredCredentials_Click">Load/Refresh stored WiFi profiles</Button>
-                            <!--<CheckBox VerticalAlignment="Top" HorizontalAlignment="Right" Content="Show passwords as plain text"/>-->
-                            <ListView Margin="0,60,0,0" x:Name="ContactsLV" ItemsSource="{x:Bind StoredCredentials}">
+                            <ListView Margin="0,60,0,0" x:Name="ContactsLV">
                                 <ListView.ItemContainerStyle>
                                     <Style TargetType="ListViewItem">
                                         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                                     </Style>
                                 </ListView.ItemContainerStyle>
                                 <ListView.ItemTemplate>
-                                    <DataTemplate x:DataType="local:WifiAccessPointDataViewModel" >
+                                    <DataTemplate x:DataType="local:WifiAccessPointDataViewModelWrapper">
                                         <Grid Margin="0,0,0,0">
                                             <Grid.RowDefinitions>
                                                 <RowDefinition Height="*"/>

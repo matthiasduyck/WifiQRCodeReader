@@ -50,6 +50,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\Wifi QR code scanner\ApplicationSettings.cs">
+      <Link>ApplicationSettings.cs</Link>
+    </Compile>
     <Compile Include="..\..\Wifi QR code scanner\Business\WifiAccessPointData.cs">
       <Link>WifiAccessPointData.cs</Link>
     </Compile>

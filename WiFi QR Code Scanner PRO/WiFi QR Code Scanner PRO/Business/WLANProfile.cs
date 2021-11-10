@@ -7,13 +7,6 @@ using System.Xml.Serialization;
 
 namespace WiFi_QR_Code_Scanner_PRO.Business
 {
-    // using System.Xml.Serialization;
-    // XmlSerializer serializer = new XmlSerializer(typeof(WLANProfile));
-    // using (StringReader reader = new StringReader(xml))
-    // {
-    //    var test = (WLANProfile)serializer.Deserialize(reader);
-    // }
-
     [XmlRoot(ElementName = "SSID")]
     public class SSID
     {

@@ -33,7 +33,6 @@ using Windows.Storage.Search;
 using static WiFi_QR_Code_Scanner_PRO.Managers.StoredCredentialsManager;
 using System.Linq;
 
-// The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
 namespace WiFi_QR_Code_Scanner_PRO
 {
@@ -51,14 +50,6 @@ namespace WiFi_QR_Code_Scanner_PRO
         private bool HasBeenDeactivated { get; set; }
 
         private string lastQrSSid { get; set; }
-
-        private List<WifiAccessPointData> StoredWifiData { get; set; }
-
-        private StorageFolder ApplicationDataFolder;
-        //todo: get from settings?
-        private const string ApplicationFolderName = "Wifi QR Code Scanner PRO";
-
-
 
         public MainPage()
         {
@@ -83,14 +74,19 @@ namespace WiFi_QR_Code_Scanner_PRO
             Application.Current.LeavingBackground += Current_LeavingBackground;
             cameraManager.EnumerateCameras(cmbCameraSelect);
             StartScanningForNetworks();
-
-            //TODO: temp
-            //StoredCredentials.Add(new WifiAccessPointDataViewModel(new WifiAccessPointData(){password="pass",ssid="ssid" }));
-            //StoredCredentials.Add(new WifiAccessPointDataViewModel(new WifiAccessPointData(){password="pass2",ssid="ssid2" }));
-            //StoredCredentials.Add(new WifiAccessPointDataViewModel(new WifiAccessPointData(){password="pass3",ssid="ssid3" }));
-            //StoredCredentials.Add(new WifiAccessPointDataViewModel(new WifiAccessPointData(){password="pass4",ssid="ssid4" }));
         }
 
+        private QrCodeEncodingOptions GetQREncodingOptions {
+            get {
+                return new QrCodeEncodingOptions
+                {
+                    DisableECI = true,
+                    CharacterSet = "UTF-8",
+                    Width = 512,
+                    Height = 512,
+                };
+            }
+        }
 
 
         static void CrashHandler(object sender, System.UnhandledExceptionEventArgs args)
@@ -147,16 +143,16 @@ namespace WiFi_QR_Code_Scanner_PRO
             {
                 await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
                 () =>
-                {
-                    var availableNetworksDisplay = new List<NetworkDisplayItem>();
-
-                    foreach (var availableNetwork in availaibleNetworks)
                     {
-                        availableNetworksDisplay.Add(availableNetwork);
-                    }
+                        var availableNetworksDisplay = new List<NetworkDisplayItem>();
 
-                    this.lstNetworks.ItemsSource = availableNetworksDisplay;
-                }
+                        foreach (var availableNetwork in availaibleNetworks)
+                        {
+                            availableNetworksDisplay.Add(availableNetwork);
+                        }
+
+                        this.lstNetworks.ItemsSource = availableNetworksDisplay;
+                    }
                 );
             }
         }
@@ -186,7 +182,7 @@ namespace WiFi_QR_Code_Scanner_PRO
                     "Copy Password",
                     new UICommandInvokedHandler(this.CopyPasswordToClipboardHandlerAsync), qrmessage));
             }
-
+            
             msgbox.Commands.Add(new UICommand(
                 "Close",
                 new UICommandInvokedHandler(this.CancelHandler)));
@@ -265,13 +261,13 @@ namespace WiFi_QR_Code_Scanner_PRO
         {
             var activeTabName = ((PivotItem)(sender as Pivot).SelectedItem).Name;
             //activeTab = this.TabsView.SelectedIndex;
-            if (!string.IsNullOrEmpty(activeTabName) && activeTabName == "scan")
+            if (!string.IsNullOrEmpty(activeTabName) && activeTabName=="scan")
             {
                 ActivateCameraPreviewAndScan();
                 this.cameraManager.ScanForQRcodes = true;
                 ChangeAppStatus(AppStatus.scanningForQR);
 
-
+                
             }
             else
             {
@@ -279,7 +275,7 @@ namespace WiFi_QR_Code_Scanner_PRO
                 this.cameraManager.ScanForQRcodes = false;
                 ChangeAppStatus(AppStatus.waitingForUserInput);
 
-
+                
             }
         }
         private async void ActivateCameraPreviewAndScan()
@@ -360,14 +356,8 @@ namespace WiFi_QR_Code_Scanner_PRO
 
             var wifiQrString = WifiStringParser.createWifiString(wifiData);
 
-            //create image todo store in settings
-            var options = new QrCodeEncodingOptions
-            {
-                DisableECI = true,
-                CharacterSet = "UTF-8",
-                Width = 512,
-                Height = 512,
-            };
+            //create image
+            var options = GetQREncodingOptions;
             var qr = new ZXing.BarcodeWriter();
             qr.Options = options;
             qr.Format = ZXing.BarcodeFormat.QR_CODE;
@@ -381,7 +371,7 @@ namespace WiFi_QR_Code_Scanner_PRO
 
         private void BtnSaveFile_Click(object sender, RoutedEventArgs e)
         {
-            SaveQRFile(this.imgQrCode);//todo push to legacy mainpage
+            SaveQRFile(this.imgQrCode);
         }
 
         private async void SaveQRFile(Image imageControl)
@@ -398,7 +388,7 @@ namespace WiFi_QR_Code_Scanner_PRO
             var savePicker = new FileSavePicker();
             savePicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
             savePicker.FileTypeChoices.Add("Image", new List<string>() { ".jpg" });
-            savePicker.SuggestedFileName = "QRCodeImage_" + this.lastQrSSid + "_" + DateTime.Now.ToString("yyyyMMddhhmmss"); //todo add ssid name
+            savePicker.SuggestedFileName = "QRCodeImage_" + this.lastQrSSid + "_" + DateTime.Now.ToString("yyyyMMddhhmmss");
             StorageFile savefile = await savePicker.PickSaveFileAsync();
             if (savefile == null)
                 return;
@@ -519,63 +509,48 @@ namespace WiFi_QR_Code_Scanner_PRO
             }
         }
 
-        #region PRO section
-
-        private ObservableCollection<WifiAccessPointDataViewModel> _storedCredentials = new ObservableCollection<WifiAccessPointDataViewModel>();
-
-        public ObservableCollection<WifiAccessPointDataViewModel> StoredCredentials
-        {
-            get { return this._storedCredentials; }
-            set {
-                this._storedCredentials = value;
-            }
-        }
-
-
-        
+        #region PRO section        
 
         private void BtnRefreshStoredCredentials_Click(object sender, RoutedEventArgs e)
         {
             if (ApiInformation.IsApiContractPresent("Windows.ApplicationModel.FullTrustAppContract", 1, 0))
             {
+                proLoadStoredProfiles.IsActive = true;
+                proLoadStoredProfiles.Visibility = Visibility.Visible;
                 storedCredentialsManager.UpdateStoredCredentials();
             }
             else
             {
-                //todo show error in UI.
+                MessageManager.ShowMessageToUserAsync("An error occurred: The application did not get Full Trust App Capabilities.");
             }
         }
 
 
         public async void StoredCredentialsUpdateAsync(List<WifiAccessPointData> accessPointData)
         {
-            var accessPointViewData = accessPointData.Select(x => new WifiAccessPointDataViewModel(x));
-            ObservableCollection<WifiAccessPointDataViewModel> observableCollectionWifiData = new ObservableCollection<WifiAccessPointDataViewModel>(accessPointViewData);
+            var accessPointViewData = accessPointData.Select(x => new WifiAccessPointDataViewModelWrapper(x));
+            ObservableCollection<WifiAccessPointDataViewModelWrapper> observableCollectionWifiData = new ObservableCollection<WifiAccessPointDataViewModelWrapper>(accessPointViewData);
 
             await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
             () =>
             {
                 ContactsLV.ItemsSource = observableCollectionWifiData;
+                proLoadStoredProfiles.IsActive = false;
+                proLoadStoredProfiles.Visibility = Visibility.Collapsed;
             }
             );
         }
 
         
-        #endregion
+        
 
         private void BtnShowStoredWifiData_Click(object sender, RoutedEventArgs e)
         {
-            var networkToGenerateQRCodeFor = ((Windows.UI.Xaml.FrameworkElement)sender).DataContext as WifiAccessPointDataViewModel;
+            var networkToGenerateQRCodeFor = ((Windows.UI.Xaml.FrameworkElement)sender).DataContext as WifiAccessPointDataViewModelWrapper;
             var wifiQrString = WifiStringParser.createWifiString(networkToGenerateQRCodeFor.AccessPointData);
 
-            //create image todo store in settings
-            var options = new QrCodeEncodingOptions
-            {
-                DisableECI = true,
-                CharacterSet = "UTF-8",
-                Width = 512,
-                Height = 512,
-            };
+            //create image
+            var options = GetQREncodingOptions;
             var qr = new ZXing.BarcodeWriter();
             qr.Options = options;
             qr.Format = ZXing.BarcodeFormat.QR_CODE;
@@ -613,23 +588,15 @@ namespace WiFi_QR_Code_Scanner_PRO
             dataPackage.SetText(this.txtPasswordFromStoredNetwork.Text);
             Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(dataPackage);
         }
-    }
 
-
-    public class WifiAccessPointDataViewModel
-    {
         
-        public WifiAccessPointData AccessPointData { get; set; }
-        public WifiAccessPointDataViewModel(WifiAccessPointData accessPointData)
-        {
-            this.AccessPointData = accessPointData;
-            this.DisplayPassword = "***";
-            this.DisplaySsid = accessPointData.ssid;
-        }
-
-        public string DisplayPassword { get; set; }
-        public string DisplaySsid { get; set; }
-
-
     }
+    // This wrapper is needed because the base class cannot be linked in the main page
+    public class WifiAccessPointDataViewModelWrapper : WifiAccessPointDataViewModel
+    {
+        public WifiAccessPointDataViewModelWrapper(WifiAccessPointData wifiAccessPointData) : base(wifiAccessPointData)
+        {
+        }
+    }
+    #endregion
 }

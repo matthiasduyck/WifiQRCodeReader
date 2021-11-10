@@ -127,11 +127,13 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ApplicationSettings.cs" />
     <Compile Include="Business\AppStatus.cs" />
     <Compile Include="Business\ComboboxItem.cs" />
     <Compile Include="Business\FrameSourceInformation.cs" />
     <Compile Include="Business\PasswordGenerator.cs" />
     <Compile Include="Business\WifiAccessPointData.cs" />
+    <Compile Include="Business\WifiAccessPointDataViewModel.cs" />
     <Compile Include="Business\WifiStringParser.cs" />
     <Compile Include="Display\NetworkDisplayItem.cs" />
     <Compile Include="MainPage.xaml.cs">
