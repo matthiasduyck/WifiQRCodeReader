@@ -9,6 +9,8 @@ using System.Text.RegularExpressions;
 using Wifi_QR_code_scanner.Business;
 using System.Security.Cryptography;
 using Wifi_QR_code_scanner;
+using System.Windows.Forms;
+using Windows.Storage;
 
 namespace FullTrust
 {
@@ -16,10 +18,11 @@ namespace FullTrust
     {
         private static string ApplicationDataFolder = ApplicationSettings.WiFiQRCodeScannerPROFolder;
 
+        [STAThread]
         static void Main(string[] args)
         {
             //This should not be needed as the UWP side should have done this already.
-            Directory.CreateDirectory(ApplicationDataFolder);
+            //Directory.CreateDirectory(ApplicationDataFolder);
             ExportWifiProfilesAsXML();
 
             //File.WriteAllText(ApplicationDataFolder + "\\wifidata.json", serializedWifiData);
@@ -32,12 +35,23 @@ namespace FullTrust
 
         private static void ExportWifiProfilesAsXML()
         {
+            //using (var fbd = new FolderBrowserDialog())
+            //{
+            //    DialogResult result = fbd.ShowDialog();
+
+            //    if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
+            //    {
+            //        fbd.SelectedPath = fbd.SelectedPath;
+            //    }
+            //}
+
             //netsh wlan export profile key=clear folder="%UserProfile%\Desktop"
             //execute the netsh command using process class
             Process processWifi = new Process();
             processWifi.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
             processWifi.StartInfo.FileName = "netsh";
-            processWifi.StartInfo.Arguments = "wlan export profile key=clear folder=\""+ApplicationDataFolder+"\"";
+            var applicationDataFolder = ApplicationData.Current.LocalSettings.Values[@"ApplicationDataFolder"] as string;
+            processWifi.StartInfo.Arguments = "wlan export profile key=clear folder=\""+ applicationDataFolder + "\"";
 
             processWifi.StartInfo.UseShellExecute = false;
             processWifi.StartInfo.RedirectStandardError = true;

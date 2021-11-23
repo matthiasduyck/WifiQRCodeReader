@@ -66,25 +66,56 @@ namespace WiFi_QR_Code_Scanner_PRO.Managers
         /// <span class="code-SummaryComment"><returns>string, as output of the command.</returns></span>
         public async void UpdateStoredCredentials()
         {
+            
             if (ApplicationDataFolder == null)
             {
                 SetupApplicationDataFolderAndSubscribeChanges();
             }
-            await FullTrustProcessLauncher.LaunchFullTrustProcessForCurrentAppAsync();
+            else
+            {
+                await FullTrustProcessLauncher.LaunchFullTrustProcessForCurrentAppAsync();
+            }
+            
+            
         }
 
         private async void SetupApplicationDataFolderAndSubscribeChanges()
         {
-            ApplicationDataFolder = await KnownFolders.DocumentsLibrary.CreateFolderAsync(ApplicationFolderName, CreationCollisionOption.OpenIfExists);
-            ApplicationDataFolder = await KnownFolders.DocumentsLibrary.GetFolderAsync(ApplicationFolderName);
-            List<string> fileTypeFilter = new List<string>();
-            fileTypeFilter.Add(".xml");
-            var fileQueryOptions = new QueryOptions(CommonFileQuery.OrderByName, fileTypeFilter);
-            profileFileQuery = ApplicationDataFolder.CreateFileQueryWithOptions(fileQueryOptions);
-            //subscribe on query's ContentsChanged event
-            profileFileQuery.ContentsChanged += Query_ContentsChanged;
-            //trigger once needed for init
-            var files = await profileFileQuery.GetFilesAsync();
+            //ApplicationDataFolder = await KnownFolders.DocumentsLibrary.CreateFolderAsync(ApplicationFolderName, CreationCollisionOption.OpenIfExists);
+            //ApplicationDataFolder = await KnownFolders.DocumentsLibrary.GetFolderAsync(ApplicationFolderName);
+
+            var folderPicker = new Windows.Storage.Pickers.FolderPicker();
+            folderPicker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary;
+            folderPicker.FileTypeFilter.Add("*");
+            folderPicker.CommitButtonText = "Create and select new folder for profiles";
+
+            ApplicationDataFolder = await folderPicker.PickSingleFolderAsync();
+            if (ApplicationDataFolder != null)
+            {
+                // Application now has read/write access to all contents in the picked folder
+                // (including other sub-folder contents)
+                Windows.Storage.AccessCache.StorageApplicationPermissions.
+                FutureAccessList.AddOrReplace("ApplicationDataFolder", ApplicationDataFolder);
+                ApplicationData.Current.LocalSettings.Values["ApplicationDataFolder"] = ApplicationDataFolder.Path;
+                //this.textBlock.Text = "Picked folder: " + folder.Name;
+                await FullTrustProcessLauncher.LaunchFullTrustProcessForCurrentAppAsync();
+
+                List<string> fileTypeFilter = new List<string>();
+                fileTypeFilter.Add(".xml");
+                var fileQueryOptions = new QueryOptions(CommonFileQuery.OrderByName, fileTypeFilter);
+                profileFileQuery = ApplicationDataFolder.CreateFileQueryWithOptions(fileQueryOptions);
+                //subscribe on query's ContentsChanged event
+                profileFileQuery.ContentsChanged += Query_ContentsChanged;
+                //trigger once needed for init
+                var files = await profileFileQuery.GetFilesAsync();
+            }
+            else
+            {
+                //this.textBlock.Text = "Operation cancelled.";
+                //todo
+            }
+
+            
         }
 
         private void Query_ContentsChanged(Windows.Storage.Search.IStorageQueryResultBase sender, object args)
