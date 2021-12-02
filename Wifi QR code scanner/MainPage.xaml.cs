@@ -22,6 +22,8 @@ using Windows.UI;
 using Windows.UI.Core;
 using Wifi_QR_code_scanner.Display;
 using System.Threading;
+using System.Collections.ObjectModel;
+using System.Linq;
 //using Wifi_QR_Code_Sanner_Library.Managers;
 //using Wifi_QR_Code_Sanner_Library.Domain;
 
@@ -62,7 +64,8 @@ namespace Wifi_QR_code_scanner
 
             this.donateLnk.NavigateUri = new Uri("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=MSU2BD59P7442&source=url");            
             this.donateLnkGenerate.NavigateUri = new Uri("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=MSU2BD59P7442&source=url");            
-            this.donateLnkOpen.NavigateUri = new Uri("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=MSU2BD59P7442&source=url");            
+            this.donateLnkOpen.NavigateUri = new Uri("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=MSU2BD59P7442&source=url");
+            PreviewStoredCredentials();
         }
 
         private QrCodeEncodingOptions GetQREncodingOptions {
@@ -156,7 +159,11 @@ namespace Wifi_QR_code_scanner
             MessageDialog msgbox;
             if (wifiAPdata == null)
             {
-                msgbox = new MessageDialog("QR code does not contain WiFi connection data.");
+                msgbox = new MessageDialog("This QR code does not contain WiFi connection data I can process. This QR code contains the following information:"
+                    + Environment.NewLine + Environment.NewLine
+                    + qrmessage
+                    + Environment.NewLine + Environment.NewLine
+                    + "You should use my 'QR Code Scanner' App for this.");
             }
             else
             {
@@ -494,6 +501,32 @@ namespace Wifi_QR_code_scanner
                 // Show the message dialog
                 await msgbox.ShowAsync();
             }
+        }
+
+        private void PreviewStoredCredentials()
+        {
+            var options = GetQREncodingOptions;
+            var qr = new ZXing.BarcodeWriter();
+            qr.Options = options;
+            qr.Format = ZXing.BarcodeFormat.QR_CODE;
+            var result = qr.Write("https://www.microsoft.com/en-us/p/wifi-qr-code-scanner-pro/9nkj4pt4llj6");
+            this.imgQrCodeFromStoredNetwork.Source = result;
+            this.qrCodeFromStoredNetwork.Visibility = Visibility.Visible;
+
+            var fakeAccessPointData = new List<WifiAccessPointData> { };
+            fakeAccessPointData.Add(new WifiAccessPointData() { ssid = "My ISP Box 45867" });
+            fakeAccessPointData.Add(new WifiAccessPointData() { ssid = "Public City Wi-Fi network" });
+            fakeAccessPointData.Add(new WifiAccessPointData() { ssid = "Hotel Seaside Shared" });
+            var accessPointViewData = fakeAccessPointData.Select(x => new WifiAccessPointDataViewModelWrapper(x));
+            ObservableCollection<WifiAccessPointDataViewModelWrapper> observableCollectionWifiData = new ObservableCollection<WifiAccessPointDataViewModelWrapper>(accessPointViewData);
+            ContactsLV.ItemsSource = observableCollectionWifiData;
+        }
+    }
+    // This wrapper is needed because the base class cannot be linked in the main page
+    public class WifiAccessPointDataViewModelWrapper : WifiAccessPointDataViewModel
+    {
+        public WifiAccessPointDataViewModelWrapper(WifiAccessPointData wifiAccessPointData) : base(wifiAccessPointData)
+        {
         }
     }
 }

@@ -9,7 +9,7 @@
   <Identity
     Name="59867MatthiasDuyck.WiFiQRCodeScannerPRO"
     Publisher="CN=DA2D21D8-3390-4818-A996-7B7A779D9778"
-    Version="0.1.0.0" />
+    Version="0.1.1.0" />
 
   <Properties>
     <DisplayName>WiFi QR Code Scanner PRO</DisplayName>
@@ -53,7 +53,6 @@
 
   <Capabilities>
     <Capability Name="internetClient" />
-    <uap:Capability Name="documentsLibrary"/>
     <rescap:Capability Name="runFullTrust" />
     <DeviceCapability Name="microphone"/>
     <DeviceCapability Name="webcam"/>

@@ -83,13 +83,14 @@ namespace WiFi_QR_Code_Scanner_PRO.Managers
         {
             //ApplicationDataFolder = await KnownFolders.DocumentsLibrary.CreateFolderAsync(ApplicationFolderName, CreationCollisionOption.OpenIfExists);
             //ApplicationDataFolder = await KnownFolders.DocumentsLibrary.GetFolderAsync(ApplicationFolderName);
+            ApplicationDataFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
 
-            var folderPicker = new Windows.Storage.Pickers.FolderPicker();
-            folderPicker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary;
-            folderPicker.FileTypeFilter.Add("*");
-            folderPicker.CommitButtonText = "Create and select new folder for profiles";
+            //var folderPicker = new Windows.Storage.Pickers.FolderPicker();
+            //folderPicker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary;
+            //folderPicker.FileTypeFilter.Add("*");
+            //folderPicker.CommitButtonText = "Create and select new folder for profiles";
 
-            ApplicationDataFolder = await folderPicker.PickSingleFolderAsync();
+            //ApplicationDataFolder = await folderPicker.PickSingleFolderAsync();
             if (ApplicationDataFolder != null)
             {
                 // Application now has read/write access to all contents in the picked folder

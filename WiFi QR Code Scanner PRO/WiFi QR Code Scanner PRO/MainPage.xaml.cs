@@ -87,8 +87,6 @@ namespace WiFi_QR_Code_Scanner_PRO
                 };
             }
         }
-
-
         static void CrashHandler(object sender, System.UnhandledExceptionEventArgs args)
         {
             Exception e = (Exception)args.ExceptionObject;
@@ -169,7 +167,11 @@ namespace WiFi_QR_Code_Scanner_PRO
             MessageDialog msgbox;
             if (wifiAPdata == null)
             {
-                msgbox = new MessageDialog("QR code does not contain WiFi connection data.");
+                msgbox = new MessageDialog("This QR code does not contain WiFi connection data I can process. This QR code contains the following information:"
+                    + Environment.NewLine + Environment.NewLine
+                    + qrmessage
+                    + Environment.NewLine + Environment.NewLine
+                    + "You should use my 'QR Code Scanner' App for this.");
             }
             else
             {

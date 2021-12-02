@@ -13,7 +13,7 @@
     <Grid>
 
         <Pivot x:Name="TabsView" SelectionChanged="TabsView_SelectionChanged">
-            <PivotItem Name="scan" Header="Scan QR Code">
+            <PivotItem Name="scan" Header="Scan Code">
                 <!--Pivot content goes here-->
                 <Grid>
                     <!--<ProgressRing Visibility="Visible" HorizontalAlignment="Center" Margin="0,0,0,0" VerticalAlignment="Center"/>-->
@@ -37,7 +37,7 @@
                     <HyperlinkButton Name="donateLnk" Content="Donate to the developer" Margin="0,0,5,6" VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
                 </Grid>
             </PivotItem>
-            <PivotItem Header="Create QR Code">
+            <PivotItem Header="Create Code">
                 <!--Pivot content goes here-->
                 <ScrollViewer VerticalScrollBarVisibility="Visible">
                     <Grid Margin="20,20,20,20">
@@ -68,7 +68,7 @@
                 </ScrollViewer>
 
             </PivotItem>
-            <PivotItem Header="Open QR Code Image">
+            <PivotItem Header="Open QR Image">
                 <ScrollViewer VerticalScrollBarVisibility="Visible">
                     <Grid Margin="20,20,20,20">
                         <TextBlock VerticalAlignment="Top" Height="30" Text="Open an image containing a WiFi QR Code:"/>
@@ -77,7 +77,83 @@
                     </Grid>
                 </ScrollViewer>
             </PivotItem>
+            <PivotItem Header="View Stored Wi-Fi Profiles">
+                <Grid>
+                    
+                    <ProgressRing Name="proLoadStoredProfiles" Visibility="Collapsed" IsActive="False" Width="40" Height="40" />
+                    
+                    <ScrollViewer VerticalScrollBarVisibility="Visible">
+                        <Grid Margin="20,20,20,20">
+                            <TextBlock Opacity="0.5" FontFamily="Segoe UI">View all Wi-Fi profiles stored on this device with their network name, type and password:
+                                <ToolTipService.ToolTip>
+                                    <ToolTip Content="Limited to the current active Wi-Fi card."/>
+                                </ToolTipService.ToolTip>
+                            </TextBlock>
+                            <Button Opacity="0.3" Margin="0,30,0,0" VerticalAlignment="Top" Name="btnRefreshStoredCredentials">
+                                Load/Refresh Wi-Fi profiles
+                            </Button>
+                            
+                            
+                            <ListView Margin="0,90,0,0" x:Name="ContactsLV" Opacity="0.3">
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+                                <ListView.ItemTemplate>
+                                    <DataTemplate x:DataType="local:WifiAccessPointDataViewModelWrapper">
+                                        <Grid Margin="0,0,0,0">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="*"/>
+                                                <RowDefinition Height="*"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{x:Bind DisplaySsid}" Margin="0,6,0,0" 
+                    Style="{ThemeResource BaseTextBlockStyle}"/>
+                                            <TextBlock  Grid.Column="0" Grid.Row="1" Text="{x:Bind DisplayPassword}" Margin="0,0,0,6" 
+                    Style="{ThemeResource BodyTextBlockStyle}"/>
+                                            <Grid Grid.RowSpan="2" Grid.Column="1">
+                                                <Button Name="btnGenerateStoredWifiQRCode" HorizontalAlignment="Right">View Details + QR</Button>
+                                                <!--<HyperlinkButton Name="btnGenerateStoredWifiQRCode" Click="BtnShowStoredWifiData_Click" HorizontalAlignment="Right">View Details + QR</HyperlinkButton>-->
+                                            </Grid>
+
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+
+                        </Grid>
+                    </ScrollViewer>
+                    <Grid Opacity="0.3" Visibility="Collapsed" Name="qrCodeFromStoredNetwork" VerticalAlignment="Bottom" Margin="-10,20,-10,0" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" BorderBrush="Gray" BorderThickness="0,1,0,0">
+                        <Button Name="btnCloseQrCodeFromStoredNetwork" Content="Close Details" Margin="8" VerticalAlignment="Top" HorizontalAlignment="Center"/>
+                        <Image Name="imgQrCodeFromStoredNetwork" VerticalAlignment="Bottom" Height="200" Width="200" HorizontalAlignment="Left" Margin="48,48,0,48"></Image>
+                        <Grid Margin="268,48,0,48">
+                            <TextBlock VerticalAlignment="Top" Height="23" Text="WiFi Network Name:" FontWeight="Bold"/>
+                            <TextBlock Name="txtSSIDFromStoredNetwork" VerticalAlignment="Top" Height="20" Margin="0,20,0,0" Text="SampleWifiNetwork" HorizontalAlignment="Left"></TextBlock>
+
+                            <TextBlock VerticalAlignment="Top" Height="23" Margin="0,45,0,0" Text="Password:" FontWeight="Bold"/>
+                            <TextBlock Name="txtPasswordFromStoredNetwork" VerticalAlignment="Top" Height="20" Margin="0,65,0,0" Text="SamplePassword" HorizontalAlignment="Left"></TextBlock>
+
+                            <TextBlock VerticalAlignment="Top" Height="23" Margin="0,90,0,0" Text="Authentication Type:" FontWeight="Bold"/>
+                            <TextBlock Name="txtAuthenticationTypeFromStoredNetwork" VerticalAlignment="Top" Height="20" Margin="0,110,0,0" Text="WPA"/>
+
+                            <Button Name="btnSaveQrCodeImageFromStoredNetwork" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="130" Margin="0,0,0,0">Save QR Code</Button>
+                            <Button Name="btnCopyNetworkNameFromStoredNetwork" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="130" Margin="140,0,0,0">Copy Network</Button>
+                            <Button Name="btnCopyPasswordFromStoredNetwork" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="130" Margin="280,0,0,0" >Copy Password</Button>
+                        </Grid>
+                        
+                    </Grid>
+                    <Grid Margin="0,65,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"  Padding="25" BorderBrush="Gray" BorderThickness="1">
+                        <TextBlock FontWeight="Medium" TextAlignment="Center">
+                                This feature is only available in the PRO version: <LineBreak></LineBreak>
+                                    <Hyperlink NavigateUri="https://www.microsoft.com/en-us/p/wifi-qr-code-scanner-pro/9nkj4pt4llj6">https://www.microsoft.com/en-us/p/wifi-qr-code-scanner-pro/9nkj4pt4llj6</Hyperlink>
+                        </TextBlock>
+                    </Grid>
+                </Grid>
+            </PivotItem>
         </Pivot>
     </Grid>
-
 </Page>

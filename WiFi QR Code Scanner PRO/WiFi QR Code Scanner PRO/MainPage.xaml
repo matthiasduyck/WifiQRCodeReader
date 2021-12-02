@@ -12,7 +12,7 @@
     <Grid>
 
         <Pivot x:Name="TabsView" SelectionChanged="TabsView_SelectionChanged">
-            <PivotItem Name="scan" Header="Scan QR Code">
+            <PivotItem Name="scan" Header="Scan Code">
                 <!--Pivot content goes here-->
                 <Grid>
                     <!--<ProgressRing Visibility="Visible" HorizontalAlignment="Center" Margin="0,0,0,0" VerticalAlignment="Center"/>-->
@@ -35,7 +35,7 @@
                     </ComboBox>
                 </Grid>
             </PivotItem>
-            <PivotItem Header="Create QR Code">
+            <PivotItem Header="Create Code">
                 <!--Pivot content goes here-->
                 <ScrollViewer VerticalScrollBarVisibility="Visible">
                     <Grid Margin="20,20,20,20">
@@ -65,7 +65,7 @@
                 </ScrollViewer>
 
             </PivotItem>
-            <PivotItem Header="Open QR Code Image">
+            <PivotItem Header="Open QR Image">
                 <ScrollViewer VerticalScrollBarVisibility="Visible">
                     <Grid Margin="20,20,20,20">
                         <TextBlock VerticalAlignment="Top" Height="30" Text="Open an image containing a WiFi QR Code:"/>
@@ -73,13 +73,20 @@
                     </Grid>
                 </ScrollViewer>
             </PivotItem>
-            <PivotItem Header="Load Stored Profiles">
+            <PivotItem Header="View Stored Wi-Fi Profiles">
                 <Grid>
                     <ProgressRing Name="proLoadStoredProfiles" Visibility="Collapsed" IsActive="False" Width="40" Height="40" />
                     <ScrollViewer VerticalScrollBarVisibility="Visible">
                         <Grid Margin="20,20,20,20">
-                            <Button VerticalAlignment="Top" Name="btnRefreshStoredCredentials" Click="BtnRefreshStoredCredentials_Click">Load/Refresh stored WiFi profiles</Button>
-                            <ListView Margin="0,60,0,0" x:Name="ContactsLV">
+                            <TextBlock>View all Wi-Fi profiles stored on this device with their network name, type and password:
+                                <ToolTipService.ToolTip>
+                                    <ToolTip Content="Limited to the current active Wi-Fi card."/>
+                                </ToolTipService.ToolTip>
+                            </TextBlock>
+                            <Button Margin="0,30,0,0" VerticalAlignment="Top" Name="btnRefreshStoredCredentials" Click="BtnRefreshStoredCredentials_Click">
+                                Load/Refresh Wi-Fi profiles
+                            </Button>
+                            <ListView Margin="0,90,0,0" x:Name="ContactsLV">
                                 <ListView.ItemContainerStyle>
                                     <Style TargetType="ListViewItem">
                                         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
