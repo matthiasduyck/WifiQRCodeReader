@@ -86,6 +86,12 @@
                             <Button Margin="0,30,0,0" VerticalAlignment="Top" Name="btnRefreshStoredCredentials" Click="BtnRefreshStoredCredentials_Click">
                                 Load/Refresh Wi-Fi profiles
                             </Button>
+                            <Button Visibility="Collapsed" Margin="0,30,120,0" VerticalAlignment="Top" HorizontalAlignment="Right" Name="btnExportAllProfiles" Click="BtnExportAllProfiles_Click">
+                                Export profiles
+                            </Button>
+                            <Button Visibility="Collapsed" Margin="0,30,0,0" VerticalAlignment="Top" HorizontalAlignment="Right" Name="btnImportProfiles" Click="BtnImportProfiles_Click">
+                                Import profiles
+                            </Button>
                             <ListView Margin="0,90,0,0" x:Name="ContactsLV">
                                 <ListView.ItemContainerStyle>
                                     <Style TargetType="ListViewItem">

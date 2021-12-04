@@ -48,6 +48,8 @@ namespace WiFi_QR_Code_Scanner_PRO.Managers
         
         private StorageFolder ApplicationDataFolder;
 
+        private IReadOnlyList<StorageFile> Files;
+
         private const string ApplicationFolderName = ApplicationSettings.WiFiQRCodeScannerPROFolderName;
 
         private StorageFileQueryResult profileFileQuery;
@@ -95,8 +97,7 @@ namespace WiFi_QR_Code_Scanner_PRO.Managers
             {
                 // Application now has read/write access to all contents in the picked folder
                 // (including other sub-folder contents)
-                Windows.Storage.AccessCache.StorageApplicationPermissions.
-                FutureAccessList.AddOrReplace("ApplicationDataFolder", ApplicationDataFolder);
+                Windows.Storage.AccessCache.StorageApplicationPermissions.FutureAccessList.AddOrReplace("ApplicationDataFolder", ApplicationDataFolder);//todo use const for field name
                 ApplicationData.Current.LocalSettings.Values["ApplicationDataFolder"] = ApplicationDataFolder.Path;
                 //this.textBlock.Text = "Picked folder: " + folder.Name;
                 await FullTrustProcessLauncher.LaunchFullTrustProcessForCurrentAppAsync();
@@ -108,7 +109,7 @@ namespace WiFi_QR_Code_Scanner_PRO.Managers
                 //subscribe on query's ContentsChanged event
                 profileFileQuery.ContentsChanged += Query_ContentsChanged;
                 //trigger once needed for init
-                var files = await profileFileQuery.GetFilesAsync();
+                Files = await profileFileQuery.GetFilesAsync();
             }
             else
             {
@@ -119,6 +120,32 @@ namespace WiFi_QR_Code_Scanner_PRO.Managers
             
         }
 
+        public async void ExportAllProfiles()
+        {
+            if (Files != null && Files.Any())
+            {
+                var folderPicker = new Windows.Storage.Pickers.FolderPicker();
+                folderPicker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary;
+                folderPicker.FileTypeFilter.Add("*");
+                folderPicker.CommitButtonText = "Choose export location";
+
+                var exportFolder = await folderPicker.PickSingleFolderAsync();
+                if (exportFolder != null)
+                {
+                    Windows.Storage.AccessCache.StorageApplicationPermissions.FutureAccessList.AddOrReplace("ExportFolder", exportFolder);//todo use const for field name
+
+                    foreach(var file in Files)
+                    {
+                        await file.CopyAsync(exportFolder, file.Name, NameCollisionOption.GenerateUniqueName);
+                    }
+                }
+            }
+        }
+        public void ImportProfiles()
+        {
+            //todo
+        }
+
         private void Query_ContentsChanged(Windows.Storage.Search.IStorageQueryResultBase sender, object args)
         {
             LoadProfileDataFromFiles();
@@ -126,10 +153,10 @@ namespace WiFi_QR_Code_Scanner_PRO.Managers
 
         private async void LoadProfileDataFromFiles()
         {
-            var files = await profileFileQuery.GetFilesAsync();
+            Files = await profileFileQuery.GetFilesAsync();
             XmlSerializer serializer = new XmlSerializer(typeof(WLANProfile));
             var result = new List<WifiAccessPointData>();
-            foreach (var file in files)
+            foreach (var file in Files)
             {
                 var wifiProfileData = await Windows.Storage.FileIO.ReadTextAsync(file);
 

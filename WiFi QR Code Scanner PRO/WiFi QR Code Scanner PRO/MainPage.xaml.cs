@@ -539,6 +539,11 @@ namespace WiFi_QR_Code_Scanner_PRO
                 ContactsLV.ItemsSource = observableCollectionWifiData;
                 proLoadStoredProfiles.IsActive = false;
                 proLoadStoredProfiles.Visibility = Visibility.Collapsed;
+                if (accessPointViewData.Any())
+                {
+                    btnExportAllProfiles.Visibility = Visibility.Visible;
+                    btnImportProfiles.Visibility = Visibility.Visible;
+                }
             }
             );
         }
@@ -591,7 +596,15 @@ namespace WiFi_QR_Code_Scanner_PRO
             Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(dataPackage);
         }
 
-        
+        private void BtnExportAllProfiles_Click(object sender, RoutedEventArgs e)
+        {
+            storedCredentialsManager.ExportAllProfiles();
+        }
+
+        private void BtnImportProfiles_Click(object sender, RoutedEventArgs e)
+        {
+            storedCredentialsManager.ImportProfiles();
+        }
     }
     // This wrapper is needed because the base class cannot be linked in the main page
     public class WifiAccessPointDataViewModelWrapper : WifiAccessPointDataViewModel
