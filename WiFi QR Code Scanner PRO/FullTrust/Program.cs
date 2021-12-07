@@ -23,7 +23,18 @@ namespace FullTrust
         {
             //This should not be needed as the UWP side should have done this already.
             //Directory.CreateDirectory(ApplicationDataFolder);
-            ExportWifiProfilesAsXML();
+
+            var fullTrustApplicationMode = ApplicationData.Current.LocalSettings.Values[ApplicationSettings.LocalSettingsFullTrustApplicationModeSettingName] as string;
+            if (fullTrustApplicationMode.Equals(FullTrustApplicationMode.ImportProfiles.ToString(), StringComparison.InvariantCultureIgnoreCase))
+            {
+                //we are importing profiles to the system
+                ImportXMLWifiProfiles();
+            }
+            else
+            {
+                //we are exporting profiles, ie default mode
+                ExportWifiProfilesAsXML();
+            }
 
             //File.WriteAllText(ApplicationDataFolder + "\\wifidata.json", serializedWifiData);
         }
@@ -32,6 +43,35 @@ namespace FullTrust
         //{
         //    var blo = ManagedNativeWifi.NativeWifi.EnumerateProfiles().ToList();
         //}
+        private static void ImportXMLWifiProfiles()
+        {
+            var importFolder = ApplicationData.Current.LocalSettings.Values[ApplicationSettings.LocalSettingsImportFolderSettingName] as string;
+            var files = Directory.GetFiles(importFolder, "*.xml", SearchOption.TopDirectoryOnly);
+            foreach(var file in files)
+            {
+                ImportXMLProfile(file);
+            }
+        }
+
+        private static void ImportXMLProfile(string file)
+        {
+            //execute the netsh command using process class
+            Process processWifi = new Process();
+            processWifi.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            processWifi.StartInfo.FileName = "netsh";
+            processWifi.StartInfo.Arguments = "wlan add profile filename=\"" + file + "\"";
+
+            processWifi.StartInfo.UseShellExecute = false;
+            processWifi.StartInfo.RedirectStandardError = true;
+            processWifi.StartInfo.RedirectStandardInput = true;
+            processWifi.StartInfo.RedirectStandardOutput = true;
+            processWifi.StartInfo.CreateNoWindow = true;
+            processWifi.Start();
+
+            string output = processWifi.StandardOutput.ReadToEnd();
+
+            processWifi.WaitForExit();
+        }
 
         private static void ExportWifiProfilesAsXML()
         {
@@ -50,7 +90,7 @@ namespace FullTrust
             Process processWifi = new Process();
             processWifi.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
             processWifi.StartInfo.FileName = "netsh";
-            var applicationDataFolder = ApplicationData.Current.LocalSettings.Values[@"ApplicationDataFolder"] as string;
+            var applicationDataFolder = ApplicationData.Current.LocalSettings.Values[ApplicationSettings.LocalSettingsApplicationDataFolderSettingName] as string;
             processWifi.StartInfo.Arguments = "wlan export profile key=clear folder=\""+ applicationDataFolder + "\"";
 
             processWifi.StartInfo.UseShellExecute = false;

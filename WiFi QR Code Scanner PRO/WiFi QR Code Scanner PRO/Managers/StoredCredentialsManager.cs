@@ -98,7 +98,8 @@ namespace WiFi_QR_Code_Scanner_PRO.Managers
                 // Application now has read/write access to all contents in the picked folder
                 // (including other sub-folder contents)
                 Windows.Storage.AccessCache.StorageApplicationPermissions.FutureAccessList.AddOrReplace("ApplicationDataFolder", ApplicationDataFolder);//todo use const for field name
-                ApplicationData.Current.LocalSettings.Values["ApplicationDataFolder"] = ApplicationDataFolder.Path;
+                ApplicationData.Current.LocalSettings.Values[ApplicationSettings.LocalSettingsApplicationDataFolderSettingName] = ApplicationDataFolder.Path;
+                ApplicationData.Current.LocalSettings.Values[ApplicationSettings.LocalSettingsFullTrustApplicationModeSettingName] = FullTrustApplicationMode.ExportProfilesToFilesystem.ToString();
                 //this.textBlock.Text = "Picked folder: " + folder.Name;
                 await FullTrustProcessLauncher.LaunchFullTrustProcessForCurrentAppAsync();
 
@@ -141,9 +142,23 @@ namespace WiFi_QR_Code_Scanner_PRO.Managers
                 }
             }
         }
-        public void ImportProfiles()
+        public async void ImportProfiles()
         {
-            //todo
+            var folderPicker = new Windows.Storage.Pickers.FolderPicker();
+            folderPicker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary;
+            folderPicker.FileTypeFilter.Add(".xml");
+            folderPicker.CommitButtonText = "Choose Import XML Folder Location";
+            var importFolder = await folderPicker.PickSingleFolderAsync();
+            if (importFolder != null)
+            {
+                Windows.Storage.AccessCache.StorageApplicationPermissions.FutureAccessList.AddOrReplace("ImportFolder", importFolder);//todo use const for field name
+
+
+                ApplicationData.Current.LocalSettings.Values[ApplicationSettings.LocalSettingsApplicationDataFolderSettingName] = ApplicationDataFolder.Path;
+                ApplicationData.Current.LocalSettings.Values[ApplicationSettings.LocalSettingsImportFolderSettingName] = importFolder.Path;
+                ApplicationData.Current.LocalSettings.Values[ApplicationSettings.LocalSettingsFullTrustApplicationModeSettingName] = FullTrustApplicationMode.ImportProfiles.ToString();
+                await FullTrustProcessLauncher.LaunchFullTrustProcessForCurrentAppAsync();
+            }
         }
 
         private void Query_ContentsChanged(Windows.Storage.Search.IStorageQueryResultBase sender, object args)
