@@ -124,13 +124,28 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Business\AppStatus.cs">
+      <Link>Business\AppStatus.cs</Link>
+    </Compile>
+    <Compile Include="..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Business\ComboboxItem.cs">
+      <Link>Business\ComboboxItem.cs</Link>
+    </Compile>
+    <Compile Include="..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Business\FrameSourceInformation.cs">
+      <Link>Business\FrameSourceInformation.cs</Link>
+    </Compile>
+    <Compile Include="..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Managers\BarcodeManager.cs">
+      <Link>Managers\BarcodeManager.cs</Link>
+    </Compile>
+    <Compile Include="..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Managers\MessageManager.cs">
+      <Link>Managers\MessageManager.cs</Link>
+    </Compile>
+    <Compile Include="..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Managers\QRCameraManager.cs">
+      <Link>Managers\QRCameraManager.cs</Link>
+    </Compile>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="ApplicationSettings.cs" />
-    <Compile Include="Business\AppStatus.cs" />
-    <Compile Include="Business\ComboboxItem.cs" />
-    <Compile Include="Business\FrameSourceInformation.cs" />
     <Compile Include="Business\PasswordGenerator.cs" />
     <Compile Include="Business\WifiAccessPointData.cs" />
     <Compile Include="Business\WifiAccessPointDataViewModel.cs" />
@@ -139,9 +154,6 @@
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Managers\BarcodeManager.cs" />
-    <Compile Include="Managers\MessageManager.cs" />
-    <Compile Include="Managers\QRCameraManager.cs" />
     <Compile Include="Managers\WifiConnectionManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -24,6 +24,8 @@ using Wifi_QR_code_scanner.Display;
 using System.Threading;
 using System.Collections.ObjectModel;
 using System.Linq;
+using QR_Code_Scanner.Business;
+using QR_Library.Managers;
 //using Wifi_QR_Code_Sanner_Library.Managers;
 //using Wifi_QR_Code_Sanner_Library.Domain;
 
@@ -278,9 +280,9 @@ namespace Wifi_QR_code_scanner
             if (cameraManager != null && cameraManager.ScanForQRcodes == false && this.HasBeenDeactivated)
             {
                 this.HasBeenDeactivated = false;
-                if (selected != null && selected is Wifi_QR_code_scanner.Business.ComboboxItem)
+                if (selected != null && selected is QR_Code_Scanner.Business.ComboboxItem)
                 {
-                    var selectedCamera = ((Wifi_QR_code_scanner.Business.ComboboxItem)cmbCameraSelect.SelectedItem);
+                    var selectedCamera = ((QR_Code_Scanner.Business.ComboboxItem)cmbCameraSelect.SelectedItem);
                     //start cam again
                     await cameraManager.StartPreviewAsync(selectedCamera);
                 }

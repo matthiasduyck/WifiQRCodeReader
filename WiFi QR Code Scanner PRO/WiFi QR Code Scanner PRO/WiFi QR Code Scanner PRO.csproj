@@ -124,17 +124,26 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\..\Wifi QR code scanner\ApplicationSettings.cs">
-      <Link>ApplicationSettings.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Wifi QR code scanner\Business\AppStatus.cs">
+    <Compile Include="..\..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Business\AppStatus.cs">
       <Link>Business\AppStatus.cs</Link>
     </Compile>
-    <Compile Include="..\..\Wifi QR code scanner\Business\ComboboxItem.cs">
+    <Compile Include="..\..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Business\ComboboxItem.cs">
       <Link>Business\ComboboxItem.cs</Link>
     </Compile>
-    <Compile Include="..\..\Wifi QR code scanner\Business\FrameSourceInformation.cs">
+    <Compile Include="..\..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Business\FrameSourceInformation.cs">
       <Link>Business\FrameSourceInformation.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Managers\BarcodeManager.cs">
+      <Link>Managers\BarcodeManager.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Managers\MessageManager.cs">
+      <Link>Managers\MessageManager.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Managers\QRCameraManager.cs">
+      <Link>Managers\QRCameraManager.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Wifi QR code scanner\ApplicationSettings.cs">
+      <Link>ApplicationSettings.cs</Link>
     </Compile>
     <Compile Include="..\..\Wifi QR code scanner\Business\PasswordGenerator.cs">
       <Link>Business\PasswordGenerator.cs</Link>
@@ -150,15 +159,6 @@
     </Compile>
     <Compile Include="..\..\Wifi QR code scanner\Display\NetworkDisplayItem.cs">
       <Link>Display\NetworkDisplayItem.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Wifi QR code scanner\Managers\BarcodeManager.cs">
-      <Link>Managers\BarcodeManager.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Wifi QR code scanner\Managers\MessageManager.cs">
-      <Link>Managers\MessageManager.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Wifi QR code scanner\Managers\QRCameraManager.cs">
-      <Link>Managers\QRCameraManager.cs</Link>
     </Compile>
     <Compile Include="..\..\Wifi QR code scanner\Managers\WifiConnectionManager.cs">
       <Link>Managers\WifiConnectionManager.cs</Link>
