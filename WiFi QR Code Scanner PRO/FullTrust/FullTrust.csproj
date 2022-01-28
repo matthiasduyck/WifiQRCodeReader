@@ -54,11 +54,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Business\WifiAccessPointData.cs">
+      <Link>WifiAccessPointData.cs</Link>
+    </Compile>
     <Compile Include="..\..\Wifi QR code scanner\ApplicationSettings.cs">
       <Link>ApplicationSettings.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Wifi QR code scanner\Business\WifiAccessPointData.cs">
-      <Link>WifiAccessPointData.cs</Link>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

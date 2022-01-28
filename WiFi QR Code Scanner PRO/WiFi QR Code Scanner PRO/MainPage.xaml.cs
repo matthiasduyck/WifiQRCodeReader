@@ -47,6 +47,7 @@ namespace WiFi_QR_Code_Scanner_PRO
         System.Threading.Timer scanningTimer;
         CancellationTokenSource qrAnalyzerCancellationTokenSource;
 
+        private bool lastResultFromScanner;
 
         private bool HasBeenDeactivated { get; set; }
 
@@ -161,8 +162,9 @@ namespace WiFi_QR_Code_Scanner_PRO
         /// Method to be triggered by delegate to display message to start connecting to a network
         /// </summary>
         /// <param name="qrmessage"></param>
-        public async void handleQRcodeFound(string qrmessage)
+        public async void handleQRcodeFound(string qrmessage, bool fromScanner)
         {
+            lastResultFromScanner = fromScanner;
             ChangeAppStatus(AppStatus.waitingForUserInput);
             var wifiAPdata = WifiStringParser.parseWifiString(qrmessage);
             MessageDialog msgbox;
@@ -489,7 +491,7 @@ namespace WiFi_QR_Code_Scanner_PRO
                         // Get the SoftwareBitmap representation of the file
                         var softwareBitmap = await decoder.GetSoftwareBitmapAsync();
                         var QRcodeResult = barcodeManager.DecodeBarcodeImage(softwareBitmap);
-                        handleQRcodeFound(QRcodeResult);
+                        handleQRcodeFound(QRcodeResult,false);
                     }
                     catch (Exception ex)
                     {

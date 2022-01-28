@@ -155,5 +155,19 @@
                 </Grid>
             </PivotItem>
         </Pivot>
+        <Grid Visibility="Collapsed" MinHeight="150" Name="GrdNagware" Margin="0,65,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"  Padding="25" BorderBrush="Gray" BorderThickness="1">
+            <StackPanel>
+                <TextBlock FontSize="20" HorizontalAlignment="Stretch" Margin="0,0,0,20">Thank you for using WiFi QR Code Scanner!</TextBlock>
+                <TextBlock MinWidth="500" MaxWidth="600" Margin="0,0,0,20" FontWeight="Medium" TextAlignment="Left" TextWrapping="Wrap">
+                    Please consider upgrading to the PRO version with added features and to support the development of the app.
+                </TextBlock>
+                <TextBlock MinWidth="500" MaxWidth="600" Margin="0,0,0,20" FontWeight="Normal" TextAlignment="Left" TextWrapping="Wrap">
+                    Download WiFi QR Code Scanner PRO here: <LineBreak></LineBreak><Hyperlink NavigateUri="https://www.microsoft.com/en-us/p/wifi-qr-code-scanner-pro/9nkj4pt4llj6">https://www.microsoft.com/en-us/p/wifi-qr-code-scanner-pro/9nkj4pt4llj6</Hyperlink>
+                </TextBlock>
+                <Grid>
+                    <Button Click="BtnCloseNagware_Click" Name="BtnCloseNagware" HorizontalAlignment="Left">Close</Button>
+                </Grid>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Page>

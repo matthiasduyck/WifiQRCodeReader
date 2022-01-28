@@ -41,6 +41,7 @@ namespace Wifi_QR_code_scanner
         System.Threading.Timer scanningTimer;
         CancellationTokenSource qrAnalyzerCancellationTokenSource;
 
+        private bool lastResultFromScanner;
 
         private bool HasBeenDeactivated { get; set; }
 
@@ -68,6 +69,10 @@ namespace Wifi_QR_code_scanner
             this.donateLnkGenerate.NavigateUri = new Uri("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=MSU2BD59P7442&source=url");            
             this.donateLnkOpen.NavigateUri = new Uri("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=MSU2BD59P7442&source=url");
             PreviewStoredCredentials();
+            if (NagwareManager.ShouldNag())
+            {
+                GrdNagware.Visibility = Visibility.Visible;
+            }
         }
 
         private QrCodeEncodingOptions GetQREncodingOptions {
@@ -154,8 +159,9 @@ namespace Wifi_QR_code_scanner
         /// Method to be triggered by delegate to display message to start connecting to a network
         /// </summary>
         /// <param name="qrmessage"></param>
-        public async void handleQRcodeFound(string qrmessage)
+        public async void handleQRcodeFound(string qrmessage,bool fromScanner)
         {
+            lastResultFromScanner = fromScanner;
             ChangeAppStatus(AppStatus.waitingForUserInput);
             var wifiAPdata = WifiStringParser.parseWifiString(qrmessage);
             MessageDialog msgbox;
@@ -482,7 +488,7 @@ namespace Wifi_QR_code_scanner
                         // Get the SoftwareBitmap representation of the file
                         var softwareBitmap = await decoder.GetSoftwareBitmapAsync();
                         var QRcodeResult = barcodeManager.DecodeBarcodeImage(softwareBitmap);
-                        handleQRcodeFound(QRcodeResult);
+                        handleQRcodeFound(QRcodeResult,false);
                     }
                     catch (Exception ex)
                     {
@@ -522,6 +528,11 @@ namespace Wifi_QR_code_scanner
             var accessPointViewData = fakeAccessPointData.Select(x => new WifiAccessPointDataViewModelWrapper(x));
             ObservableCollection<WifiAccessPointDataViewModelWrapper> observableCollectionWifiData = new ObservableCollection<WifiAccessPointDataViewModelWrapper>(accessPointViewData);
             ContactsLV.ItemsSource = observableCollectionWifiData;
+        }
+
+        private void BtnCloseNagware_Click(object sender, RoutedEventArgs e)
+        {
+            GrdNagware.Visibility = Visibility.Collapsed;
         }
     }
     // This wrapper is needed because the base class cannot be linked in the main page
