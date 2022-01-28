@@ -133,6 +133,12 @@
     <Compile Include="..\..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Business\FrameSourceInformation.cs">
       <Link>Business\FrameSourceInformation.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Business\WifiAccessPointData.cs">
+      <Link>Business\WifiAccessPointData.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Business\WifiStringParser.cs">
+      <Link>Business\WifiStringParser.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Managers\BarcodeManager.cs">
       <Link>Managers\BarcodeManager.cs</Link>
     </Compile>
@@ -148,14 +154,8 @@
     <Compile Include="..\..\Wifi QR code scanner\Business\PasswordGenerator.cs">
       <Link>Business\PasswordGenerator.cs</Link>
     </Compile>
-    <Compile Include="..\..\Wifi QR code scanner\Business\WifiAccessPointData.cs">
-      <Link>Business\WifiAccessPointData.cs</Link>
-    </Compile>
     <Compile Include="..\..\Wifi QR code scanner\Business\WifiAccessPointDataViewModel.cs">
       <Link>Business\WifiAccessPointDataViewModel.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Wifi QR code scanner\Business\WifiStringParser.cs">
-      <Link>Business\WifiStringParser.cs</Link>
     </Compile>
     <Compile Include="..\..\Wifi QR code scanner\Display\NetworkDisplayItem.cs">
       <Link>Display\NetworkDisplayItem.cs</Link>

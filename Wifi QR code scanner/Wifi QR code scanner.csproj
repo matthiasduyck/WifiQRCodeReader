@@ -133,6 +133,12 @@
     <Compile Include="..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Business\FrameSourceInformation.cs">
       <Link>Business\FrameSourceInformation.cs</Link>
     </Compile>
+    <Compile Include="..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Business\WifiAccessPointData.cs">
+      <Link>Business\WifiAccessPointData.cs</Link>
+    </Compile>
+    <Compile Include="..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Business\WifiStringParser.cs">
+      <Link>Business\WifiStringParser.cs</Link>
+    </Compile>
     <Compile Include="..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Managers\BarcodeManager.cs">
       <Link>Managers\BarcodeManager.cs</Link>
     </Compile>
@@ -147,9 +153,7 @@
     </Compile>
     <Compile Include="ApplicationSettings.cs" />
     <Compile Include="Business\PasswordGenerator.cs" />
-    <Compile Include="Business\WifiAccessPointData.cs" />
     <Compile Include="Business\WifiAccessPointDataViewModel.cs" />
-    <Compile Include="Business\WifiStringParser.cs" />
     <Compile Include="Display\NetworkDisplayItem.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
