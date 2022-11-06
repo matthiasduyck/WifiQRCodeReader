@@ -47,7 +47,7 @@ namespace WiFi_QR_Code_Scanner_PRO
         System.Threading.Timer scanningTimer;
         CancellationTokenSource qrAnalyzerCancellationTokenSource;
 
-        private bool lastResultFromScanner;
+        //private bool lastResultFromScanner;
 
         private bool HasBeenDeactivated { get; set; }
 
@@ -164,17 +164,17 @@ namespace WiFi_QR_Code_Scanner_PRO
         /// <param name="qrmessage"></param>
         public async void handleQRcodeFound(string qrmessage, bool fromScanner)
         {
-            lastResultFromScanner = fromScanner;
+            //lastResultFromScanner = fromScanner;
             ChangeAppStatus(AppStatus.waitingForUserInput);
             var wifiAPdata = WifiStringParser.parseWifiString(qrmessage);
             MessageDialog msgbox;
             if (wifiAPdata == null)
             {
-                msgbox = new MessageDialog("This QR code does not contain WiFi connection data I can process. This QR code contains the following information:"
+                msgbox = new MessageDialog("This QR code is not recognized as a WiFi QR code. This QR code contains the following information:"
                     + Environment.NewLine + Environment.NewLine
                     + qrmessage
                     + Environment.NewLine + Environment.NewLine
-                    + "You should use my 'QR Code Scanner' App for this.");
+                    + "You can use my free 'QR Code Scanner' app or 'QR Code Scanner PRO' for general purpose QR codes.");
             }
             else
             {
@@ -247,19 +247,25 @@ namespace WiFi_QR_Code_Scanner_PRO
         }
         private async void Application_Suspending(object sender, SuspendingEventArgs e)
         {
-            //Debug.WriteLine("Application Suspending");
-            var deferral = e.SuspendingOperation.GetDeferral();
+            try
+            {
+                //Debug.WriteLine("Application Suspending");
+                var deferral = e.SuspendingOperation.GetDeferral();
 
-            this.scanningTimer.Dispose();
-            this.cameraManager.ScanForQRcodes = false;
-            this.qrAnalyzerCancellationTokenSource.Cancel();
+                if (this.scanningTimer != null) { this.scanningTimer.Dispose(); }
+                this.cameraManager.ScanForQRcodes = false;
+                this.qrAnalyzerCancellationTokenSource.Cancel();
 
-            await cameraManager.CleanupCameraAsync();
+                await cameraManager.CleanupCameraAsync();
 
-            this.barcodeManager = null;
-            this.cameraManager = null;
-            this.wifiConnectionManager = null;
-            deferral.Complete();
+                this.barcodeManager = null;
+                this.cameraManager = null;
+                this.wifiConnectionManager = null;
+                deferral.Complete();
+            }
+            catch (Exception ex)
+            {
+            }
         }
 
         private void TabsView_SelectionChanged(object sender, SelectionChangedEventArgs e)

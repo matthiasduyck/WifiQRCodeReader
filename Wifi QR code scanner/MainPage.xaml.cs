@@ -167,11 +167,11 @@ namespace Wifi_QR_code_scanner
             MessageDialog msgbox;
             if (wifiAPdata == null)
             {
-                msgbox = new MessageDialog("This QR code does not contain WiFi connection data I can process. This QR code contains the following information:"
+                msgbox = new MessageDialog("This QR code is not recognized as a WiFi QR code. This QR code contains the following information:"
                     + Environment.NewLine + Environment.NewLine
                     + qrmessage
                     + Environment.NewLine + Environment.NewLine
-                    + "You should use my 'QR Code Scanner' App for this.");
+                    + "You can use my free 'QR Code Scanner' app or 'QR Code Scanner PRO' for general purpose QR codes.");
             }
             else
             {
@@ -244,19 +244,24 @@ namespace Wifi_QR_code_scanner
         }
         private async void Application_Suspending(object sender, SuspendingEventArgs e)
         {
-            //Debug.WriteLine("Application Suspending");
-            var deferral = e.SuspendingOperation.GetDeferral();
+            try
+            {
+                //Debug.WriteLine("Application Suspending");
+                var deferral = e.SuspendingOperation.GetDeferral();
 
-            this.scanningTimer.Dispose();
-            this.cameraManager.ScanForQRcodes = false;
-            this.qrAnalyzerCancellationTokenSource.Cancel();
+                if (this.scanningTimer != null) { this.scanningTimer.Dispose(); }
+                this.cameraManager.ScanForQRcodes = false;
+                this.qrAnalyzerCancellationTokenSource.Cancel();
 
-            await cameraManager.CleanupCameraAsync();
+                await cameraManager.CleanupCameraAsync();
 
-            this.barcodeManager = null;
-            this.cameraManager = null;
-            this.wifiConnectionManager = null;
-            deferral.Complete();
+                this.barcodeManager = null;
+                this.cameraManager = null;
+                this.wifiConnectionManager = null;
+                deferral.Complete();
+            }
+            catch (Exception ex){
+            }
         }
 
         private void TabsView_SelectionChanged(object sender, SelectionChangedEventArgs e)

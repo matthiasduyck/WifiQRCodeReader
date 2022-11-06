@@ -56,13 +56,15 @@
     <DefaultLanguage>en-US</DefaultLanguage>
     <PackageCertificateKeyFile>Package_StoreKey.pfx</PackageCertificateKeyFile>
     <EntryPointProjectUniqueName>..\WiFi QR Code Scanner PRO\WiFi QR Code Scanner PRO.csproj</EntryPointProjectUniqueName>
-    <PackageCertificateThumbprint>63E6457A5F646DE3BAC40FEBE2B3018E9F3F897B</PackageCertificateThumbprint>
     <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <AppxBundlePlatforms>x86|x64|arm|arm64</AppxBundlePlatforms>
     <AppInstallerUpdateFrequency>1</AppInstallerUpdateFrequency>
     <AppInstallerCheckForUpdateFrequency>OnApplicationRun</AppInstallerCheckForUpdateFrequency>
     <AppxPackageDir>C:\Users\Matthias\Documents\</AppxPackageDir>
+    <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
+    <GenerateTestArtifacts>True</GenerateTestArtifacts>
+    <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <AppxBundle>Always</AppxBundle>
