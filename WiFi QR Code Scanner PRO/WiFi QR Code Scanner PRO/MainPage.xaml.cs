@@ -62,7 +62,7 @@ namespace WiFi_QR_Code_Scanner_PRO
 
             QrCodeDecodedDelegate handler = new QrCodeDecodedDelegate(handleQRcodeFound);
             qrAnalyzerCancellationTokenSource = new CancellationTokenSource();
-            cameraManager = new QRCameraManager(PreviewControl, Dispatcher, handler, qrAnalyzerCancellationTokenSource);
+            cameraManager = new QRCameraManager(PreviewControl, Dispatcher, handler, qrAnalyzerCancellationTokenSource, null);//todo add settings
 
             StoredCredentialsUpdateDelegate storedCredentialsUpdateDelegate = new StoredCredentialsUpdateDelegate(StoredCredentialsUpdateAsync);
             storedCredentialsManager = new StoredCredentialsManager(storedCredentialsUpdateDelegate);
@@ -76,8 +76,9 @@ namespace WiFi_QR_Code_Scanner_PRO
             Application.Current.LeavingBackground += Current_LeavingBackground;
             cameraManager.EnumerateCameras(cmbCameraSelect);
             StartScanningForNetworks();
+            grdSettings.Visibility = Visibility.Collapsed;
         }
-
+        //todo change this to come from settings
         private QrCodeEncodingOptions GetQREncodingOptions {
             get {
                 return new QrCodeEncodingOptions
@@ -387,14 +388,14 @@ namespace WiFi_QR_Code_Scanner_PRO
 
         private async void SaveQRFile(Image imageControl)
         {
-            var _bitmap = new RenderTargetBitmap();
-            //verify they are filled in
-            if (imageControl.Source == null)
+            // Verify if the image source is filled in
+            if (this.imgQrCode.Source == null || !(this.imgQrCode.Source is WriteableBitmap))
             {
                 MessageManager.ShowMessageToUserAsync("No image to save, please generate one first.");
                 return;
             }
-            await _bitmap.RenderAsync(imageControl);    //-----> This is my ImageControl.
+
+            WriteableBitmap writeableBitmap = this.imgQrCode.Source as WriteableBitmap;
 
             var savePicker = new FileSavePicker();
             savePicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
@@ -404,19 +405,22 @@ namespace WiFi_QR_Code_Scanner_PRO
             if (savefile == null)
                 return;
 
-            var pixels = await _bitmap.GetPixelsAsync();
             using (IRandomAccessStream stream = await savefile.OpenAsync(FileAccessMode.ReadWrite))
             {
-                var encoder = await
-                BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, stream);
-                byte[] bytes = pixels.ToArray();
+                var encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, stream);
+
+                // Get pixel data directly from the WriteableBitmap
+                Stream pixelStream = writeableBitmap.PixelBuffer.AsStream();
+                byte[] pixels = new byte[pixelStream.Length];
+                await pixelStream.ReadAsync(pixels, 0, pixels.Length);
+
                 encoder.SetPixelData(BitmapPixelFormat.Bgra8,
                                         BitmapAlphaMode.Ignore,
-                                        (uint)_bitmap.PixelWidth,
-                                    (uint)_bitmap.PixelHeight,
-                                        200,
-                                        200,
-                                        bytes);
+                                        (uint)writeableBitmap.PixelWidth,
+                                        (uint)writeableBitmap.PixelHeight,
+                                        96, // this is just dpi
+                                        96, // this is just dpi
+                                        pixels);
 
                 await encoder.FlushAsync();
             }
@@ -613,6 +617,46 @@ namespace WiFi_QR_Code_Scanner_PRO
         private void BtnImportProfiles_Click(object sender, RoutedEventArgs e)
         {
             storedCredentialsManager.ImportProfiles();
+        }
+
+        private void btnHelp_Click(object sender, RoutedEventArgs e)
+        {
+            Windows.System.Launcher.LaunchUriAsync(new Uri("https://matthiasduyck.wordpress.com/wifi-qr-code-scanner/help-faq/"));
+        }
+
+        private async void btnTglSettings_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.btnTglSettings.IsChecked ?? false)
+            {
+                this.grdSettings.Visibility = Visibility.Visible;
+                //await loadSettingsAsync();
+            }
+            else
+            {
+                this.grdSettings.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private async void lnkSettingsClear_Click(object sender, RoutedEventArgs e)
+        {
+            //await SettingsManager.DeleteSettings();
+            //await loadSettingsAsync();
+        }
+
+        private void btnCancel_Click(object sender, RoutedEventArgs e)
+        {
+            closeSettings();
+        }
+
+        private void btnSaveSettings_Click(object sender, RoutedEventArgs e)
+        {
+            //saveSettings();
+            closeSettings();
+        }
+        private void closeSettings()
+        {
+            this.grdSettings.Visibility = Visibility.Collapsed;
+            this.btnTglSettings.IsChecked = false;
         }
     }
     // This wrapper is needed because the base class cannot be linked in the main page
