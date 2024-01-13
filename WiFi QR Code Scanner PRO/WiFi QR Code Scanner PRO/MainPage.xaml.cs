@@ -34,16 +34,19 @@ using static WiFi_QR_Code_Scanner_PRO.Managers.StoredCredentialsManager;
 using System.Linq;
 using QR_Code_Scanner.Business;
 using QR_Library.Managers;
+using QR_Library.Business;
+using System.Threading.Tasks;
 
 namespace WiFi_QR_Code_Scanner_PRO
 {
-    
+
     public partial class MainPage : Page
     {
         QRCameraManager cameraManager;
         WifiConnectionManager wifiConnectionManager;
         StoredCredentialsManager storedCredentialsManager;
         BarcodeManager barcodeManager;
+        ISettingsManager SettingsManager;
         System.Threading.Timer scanningTimer;
         CancellationTokenSource qrAnalyzerCancellationTokenSource;
 
@@ -62,7 +65,9 @@ namespace WiFi_QR_Code_Scanner_PRO
 
             QrCodeDecodedDelegate handler = new QrCodeDecodedDelegate(handleQRcodeFound);
             qrAnalyzerCancellationTokenSource = new CancellationTokenSource();
-            cameraManager = new QRCameraManager(PreviewControl, Dispatcher, handler, qrAnalyzerCancellationTokenSource, null);//todo add settings
+
+            SettingsManager = new WifiSettingsManager();
+            cameraManager = new QRCameraManager(PreviewControl, Dispatcher, handler, qrAnalyzerCancellationTokenSource, SettingsManager);
 
             StoredCredentialsUpdateDelegate storedCredentialsUpdateDelegate = new StoredCredentialsUpdateDelegate(StoredCredentialsUpdateAsync);
             storedCredentialsManager = new StoredCredentialsManager(storedCredentialsUpdateDelegate);
@@ -78,17 +83,18 @@ namespace WiFi_QR_Code_Scanner_PRO
             StartScanningForNetworks();
             grdSettings.Visibility = Visibility.Collapsed;
         }
-        //todo change this to come from settings
-        private QrCodeEncodingOptions GetQREncodingOptions {
-            get {
-                return new QrCodeEncodingOptions
-                {
-                    DisableECI = true,
-                    CharacterSet = "UTF-8",
-                    Width = 512,
-                    Height = 512,
-                };
-            }
+
+        private async Task<QrCodeEncodingOptions> GetQREncodingOptionsAsync() {
+            var imageWidthHeightSetting = (await SettingsManager.GetSettingsAsync()).QRImageResolution;
+            var imageWidthHeight = imageWidthHeightSetting != null ? imageWidthHeightSetting.SettingItem : 512;
+            //create image
+            return new QrCodeEncodingOptions
+            {
+                DisableECI = true,
+                CharacterSet = "UTF-8",
+                Width = imageWidthHeight,
+                Height = imageWidthHeight,
+            };
         }
         static void CrashHandler(object sender, System.UnhandledExceptionEventArgs args)
         {
@@ -167,6 +173,7 @@ namespace WiFi_QR_Code_Scanner_PRO
         {
             //lastResultFromScanner = fromScanner;
             ChangeAppStatus(AppStatus.waitingForUserInput);
+            this.cameraManager.ScanForQRcodes = false;
             var wifiAPdata = WifiStringParser.parseWifiString(qrmessage);
             MessageDialog msgbox;
             if (wifiAPdata == null)
@@ -179,6 +186,13 @@ namespace WiFi_QR_Code_Scanner_PRO
             }
             else
             {
+                // load it into clipboard if settings say so:
+                var CopyResultToClipboardInstantlyWhenFoundSetting = (await SettingsManager.GetSettingsAsync()).CopyResultToClipboardInstantlyWhenFound;
+                var copyResultToClipboardInstantlyWhenFound = CopyResultToClipboardInstantlyWhenFoundSetting != null ? CopyResultToClipboardInstantlyWhenFoundSetting.SettingItem : false;
+                if (copyResultToClipboardInstantlyWhenFound)
+                {
+                    CopyPasswordToClipboard(qrmessage);
+                }
                 msgbox = new MessageDialog(wifiAPdata.ToObfuscatedString());
                 // Add commands and set their callbacks; both buttons use the same callback function instead of inline event handlers
                 msgbox.Commands.Add(new UICommand(
@@ -186,9 +200,9 @@ namespace WiFi_QR_Code_Scanner_PRO
                     new UICommandInvokedHandler(this.ConnectHandlerAsync), qrmessage));
                 msgbox.Commands.Add(new UICommand(
                     "Copy Password",
-                    new UICommandInvokedHandler(this.CopyPasswordToClipboardHandlerAsync), qrmessage));
+                    new UICommandInvokedHandler(this.CopyPasswordToClipboardHandler), qrmessage));
             }
-            
+
             msgbox.Commands.Add(new UICommand(
                 "Close",
                 new UICommandInvokedHandler(this.CancelHandler)));
@@ -210,17 +224,20 @@ namespace WiFi_QR_Code_Scanner_PRO
             await msgbox.ShowAsync();
         }
 
-        private async void CopyPasswordToClipboardHandlerAsync(IUICommand command)
+        private void CopyPasswordToClipboardHandler(IUICommand command)
         {
-            ChangeAppStatus(AppStatus.waitingForUserInput);
-            var wifistringToConnectTo = command.Id as string;
-            var wifiAPdata = WifiStringParser.parseWifiString(wifistringToConnectTo);
-            var dataPackage = new DataPackage();
-            dataPackage.SetText(wifiAPdata.password);
-            Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(dataPackage);
+            CopyPasswordToClipboard(command.Id as string);
             //enable scanning again
             this.cameraManager.ScanForQRcodes = true;
             ChangeAppStatus(AppStatus.scanningForQR);
+        }
+
+        private void CopyPasswordToClipboard(string wifiString){
+            ChangeAppStatus(AppStatus.waitingForUserInput);
+            var wifiAPdata = WifiStringParser.parseWifiString(wifiString);
+            var dataPackage = new DataPackage();
+            dataPackage.SetText(wifiAPdata.password);
+            Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(dataPackage);
         }
 
         private async void ConnectHandlerAsync(IUICommand command)
@@ -327,7 +344,7 @@ namespace WiFi_QR_Code_Scanner_PRO
             }
         }
 
-        private void BtnGenerateQR_Click(object sender, RoutedEventArgs e)
+        private async void BtnGenerateQR_Click(object sender, RoutedEventArgs e)
         {
             //grab values
             var ssid = this.txtSSID.Text;
@@ -369,7 +386,7 @@ namespace WiFi_QR_Code_Scanner_PRO
             var wifiQrString = WifiStringParser.createWifiString(wifiData);
 
             //create image
-            var options = GetQREncodingOptions;
+            var options = await GetQREncodingOptionsAsync();
             var qr = new ZXing.BarcodeWriter();
             qr.Options = options;
             qr.Format = ZXing.BarcodeFormat.QR_CODE;
@@ -564,13 +581,13 @@ namespace WiFi_QR_Code_Scanner_PRO
         
         
 
-        private void BtnShowStoredWifiData_Click(object sender, RoutedEventArgs e)
+        private async void BtnShowStoredWifiData_Click(object sender, RoutedEventArgs e)
         {
             var networkToGenerateQRCodeFor = ((Windows.UI.Xaml.FrameworkElement)sender).DataContext as WifiAccessPointDataViewModelWrapper;
             var wifiQrString = WifiStringParser.createWifiString(networkToGenerateQRCodeFor.AccessPointData);
 
             //create image
-            var options = GetQREncodingOptions;
+            var options = await GetQREncodingOptionsAsync();
             var qr = new ZXing.BarcodeWriter();
             qr.Options = options;
             qr.Format = ZXing.BarcodeFormat.QR_CODE;
@@ -629,7 +646,7 @@ namespace WiFi_QR_Code_Scanner_PRO
             if (this.btnTglSettings.IsChecked ?? false)
             {
                 this.grdSettings.Visibility = Visibility.Visible;
-                //await loadSettingsAsync();
+                await loadSettingsAsync();
             }
             else
             {
@@ -639,8 +656,8 @@ namespace WiFi_QR_Code_Scanner_PRO
 
         private async void lnkSettingsClear_Click(object sender, RoutedEventArgs e)
         {
-            //await SettingsManager.DeleteSettings();
-            //await loadSettingsAsync();
+            await SettingsManager.DeleteSettings();
+            await loadSettingsAsync();
         }
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
@@ -650,13 +667,137 @@ namespace WiFi_QR_Code_Scanner_PRO
 
         private void btnSaveSettings_Click(object sender, RoutedEventArgs e)
         {
-            //saveSettings();
+            saveSettings();
             closeSettings();
         }
         private void closeSettings()
         {
             this.grdSettings.Visibility = Visibility.Collapsed;
             this.btnTglSettings.IsChecked = false;
+        }
+        private async Task loadSettingsAsync()
+        {
+            QRSettings settings = new QRSettings();
+            try
+            {
+                settings = (QRSettings)await SettingsManager.RetrieveOrCreateSettings();
+            }
+            catch (Exception ex)
+            {
+                // Todo, should we provide more information to the user here?
+                await ShowSettingsLoadingFailedMessageBoxAsync();
+            }
+
+            nmbQRCodeImageResolution.Value = settings.QRImageResolution != null ? settings.QRImageResolution.SettingItem : nmbQRCodeImageResolution.Value;
+            chckCopyToClipboardImmediately.IsChecked = settings.CopyResultToClipboardInstantlyWhenFound != null ? settings.CopyResultToClipboardInstantlyWhenFound.SettingItem : chckCopyToClipboardImmediately.IsChecked;
+            var settingsRefreshRate = settings.ScanningRefreshRate;
+            if (settingsRefreshRate != null)
+            {
+                switch (settingsRefreshRate.SettingItem)
+                {
+                    case 50:
+                        cmbRefreshRate.SelectedIndex = 0;
+                        break;
+                    case 100:
+                        cmbRefreshRate.SelectedIndex = 1;
+                        break;
+                    case 150:
+                        cmbRefreshRate.SelectedIndex = 2;
+                        break;
+                    case 200:
+                        cmbRefreshRate.SelectedIndex = 3;
+                        break;
+                    default:
+                        cmbRefreshRate.SelectedIndex = 2;
+                        break;
+                }
+            }
+
+            var settingsScanningResolution = settings.ScanningResolution;
+            if (settingsScanningResolution != null)
+            {
+                switch (settingsScanningResolution.SettingItem)
+                {
+                    case ScanningResolutionEnum.lowest:
+                        cmbScanResolution.SelectedIndex = 0;
+                        break;
+                    case ScanningResolutionEnum.auto:
+                        cmbScanResolution.SelectedIndex = 1;
+                        break;
+                    case ScanningResolutionEnum.highest:
+                        cmbScanResolution.SelectedIndex = 2;
+                        break;
+                    default:
+                        cmbScanResolution.SelectedIndex = 1;
+                        break;
+                }
+            }
+        }
+
+        private async Task ShowSettingsLoadingFailedMessageBoxAsync()
+        {
+            var msgbox = new MessageDialog("Loading settings file failed. You can try deleting it.");
+            msgbox.Commands.Add(new UICommand(
+            "Delete",
+            new UICommandInvokedHandler(this.DeleteSettingsHandler)));
+
+            // Set the command that will be invoked by default
+            msgbox.DefaultCommandIndex = 0;
+
+            // Set the command to be invoked when escape is pressed
+            msgbox.CancelCommandIndex = 1;
+
+            // Show the message dialog
+            await msgbox.ShowAsync();
+        }
+        private void DeleteSettingsHandler(IUICommand command)
+        {
+            _ = SettingsManager.DeleteSettings();
+            _ = loadSettingsAsync();
+        }
+
+        private void saveSettings()
+        {
+            var qRSettings = new WifiQRSettings();
+            qRSettings.QRImageResolution.SettingItem = (int)nmbQRCodeImageResolution.Value;
+            qRSettings.CopyResultToClipboardInstantlyWhenFound.SettingItem = (bool)chckCopyToClipboardImmediately.IsChecked;
+            var cmbRefreshRateValue = ((ComboBoxItem)cmbRefreshRate.SelectedItem).Content.ToString();
+            switch (cmbRefreshRateValue)
+            {
+                case "50":
+                    qRSettings.ScanningRefreshRate = new NullableQRSettingItem<int>(50);
+                    break;
+                case "100":
+                    qRSettings.ScanningRefreshRate = new NullableQRSettingItem<int>(100);
+                    break;
+                case "150":
+                    qRSettings.ScanningRefreshRate = new NullableQRSettingItem<int>(150);
+                    break;
+                case "200":
+                    qRSettings.ScanningRefreshRate = new NullableQRSettingItem<int>(200);
+                    break;
+                default:
+                    qRSettings.ScanningRefreshRate = new NullableQRSettingItem<int>(150);
+                    break;
+            }
+            var cmbScanResolutionValue = ((ComboBoxItem)cmbScanResolution.SelectedItem).Content.ToString();
+            switch (cmbScanResolutionValue)
+            {
+                case "lowest":
+                    qRSettings.ScanningResolution = new NullableQRSettingItem<ScanningResolutionEnum>(ScanningResolutionEnum.lowest);
+                    break;
+                case "highest":
+                    qRSettings.ScanningResolution = new NullableQRSettingItem<ScanningResolutionEnum>(ScanningResolutionEnum.highest);
+                    break;
+                case "auto":
+                    qRSettings.ScanningResolution = new NullableQRSettingItem<ScanningResolutionEnum>(ScanningResolutionEnum.auto);
+                    break;
+                default:
+                    qRSettings.ScanningResolution = new NullableQRSettingItem<ScanningResolutionEnum>(ScanningResolutionEnum.auto);
+                    break;
+            }
+
+            SettingsManager.ReplaceExistingSetting(qRSettings);
         }
     }
     // This wrapper is needed because the base class cannot be linked in the main page

@@ -11,8 +11,8 @@
     <AssemblyName>WiFi QR Code Scanner PRO</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
-    <TargetPlatformVersion Condition=" '$(TargetPlatformVersion)' == '' ">10.0.17763.0</TargetPlatformVersion>
-    <TargetPlatformMinVersion>10.0.16299.0</TargetPlatformMinVersion>
+    <TargetPlatformVersion Condition=" '$(TargetPlatformVersion)' == '' ">10.0.18362.0</TargetPlatformVersion>
+    <TargetPlatformMinVersion>10.0.18362.0</TargetPlatformMinVersion>
     <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -127,11 +127,17 @@
     <Compile Include="..\..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Business\AppStatus.cs">
       <Link>Business\AppStatus.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Business\BaseQRSettings.cs">
+      <Link>Business\BaseQRSettings.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Business\ComboboxItem.cs">
       <Link>Business\ComboboxItem.cs</Link>
     </Compile>
     <Compile Include="..\..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Business\FrameSourceInformation.cs">
       <Link>Business\FrameSourceInformation.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Business\IQRSettings.cs">
+      <Link>Business\IQRSettings.cs</Link>
     </Compile>
     <Compile Include="..\..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Business\QRSettings.cs">
       <Link>Business\QRSettings.cs</Link>
@@ -142,11 +148,20 @@
     <Compile Include="..\..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Business\WifiAccessPointData.cs">
       <Link>Business\WifiAccessPointData.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Business\WifiQRSettings.cs">
+      <Link>Business\WifiQRSettings.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Business\WifiStringParser.cs">
       <Link>Business\WifiStringParser.cs</Link>
     </Compile>
     <Compile Include="..\..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Managers\BarcodeManager.cs">
       <Link>Managers\BarcodeManager.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Managers\BaseSettingsManager.cs">
+      <Link>Managers\BaseSettingsManager.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Managers\ISettingsManager.cs">
+      <Link>Managers\ISettingsManager.cs</Link>
     </Compile>
     <Compile Include="..\..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Managers\MessageManager.cs">
       <Link>Managers\MessageManager.cs</Link>
@@ -154,8 +169,8 @@
     <Compile Include="..\..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Managers\QRCameraManager.cs">
       <Link>Managers\QRCameraManager.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Managers\SettingsManager.cs">
-      <Link>Managers\SettingsManager.cs</Link>
+    <Compile Include="..\..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Managers\WifiSettingsManager.cs">
+      <Link>Managers\WifiSettingsManager.cs</Link>
     </Compile>
     <Compile Include="..\..\Wifi QR code scanner\ApplicationSettings.cs">
       <Link>ApplicationSettings.cs</Link>
@@ -211,6 +226,9 @@
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
       <Version>6.2.8</Version>
     </PackageReference>
+    <PackageReference Include="Microsoft.UI.Xaml">
+      <Version>2.8.1</Version>
+    </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>13.0.1</Version>
     </PackageReference>
@@ -222,7 +240,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <SDKReference Include="WindowsDesktop, Version=10.0.17763.0">
+    <SDKReference Include="WindowsDesktop, Version=10.0.18362.0">
       <Name>Windows Desktop Extensions for the UWP</Name>
     </SDKReference>
   </ItemGroup>
