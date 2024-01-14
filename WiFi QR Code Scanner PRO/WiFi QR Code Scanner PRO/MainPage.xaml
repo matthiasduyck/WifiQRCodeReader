@@ -77,7 +77,7 @@
             <PivotItem Header="View Stored Wi-Fi Profiles">
                 <Grid>
                     <ProgressRing Name="proLoadStoredProfiles" Visibility="Collapsed" IsActive="False" Width="40" Height="40" />
-                    <ScrollViewer VerticalScrollBarVisibility="Visible">
+                    <ScrollViewer Margin="0,0,0,50" VerticalScrollBarVisibility="Visible">
                         <Grid Margin="20,20,20,20">
                             <TextBlock>View all Wi-Fi profiles stored on this device with their network name, type and password:
                                 <ToolTipService.ToolTip>
@@ -93,7 +93,8 @@
                             <Button Visibility="Collapsed" Margin="0,30,0,0" VerticalAlignment="Top" HorizontalAlignment="Right" Name="btnImportProfiles" Click="BtnImportProfiles_Click">
                                 Import profiles
                             </Button>
-                            <ListView Margin="0,90,0,0" x:Name="ContactsLV">
+                            <TextBox TextChanged="txtStoredWifiFilter_TextChanged" Visibility="Collapsed" VerticalAlignment="Top" HorizontalAlignment="Left" Width="300" Height="32" Margin="0,70,0,0" Name="txtStoredWifiFilter" PlaceholderText="Filter"></TextBox>
+                            <ListView Margin="0,120,0,0" x:Name="ContactsLV">
                                 <ListView.ItemContainerStyle>
                                     <Style TargetType="ListViewItem">
                                         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -148,7 +149,7 @@
                 </Grid>
             </PivotItem>
         </Pivot>
-        <Grid Name="grdSettings" Visibility="Visible" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid Name="grdSettings" Visibility="Collapsed" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
             <ScrollViewer>
                 <Grid>
                     <StackPanel Margin="20,20,20,100">

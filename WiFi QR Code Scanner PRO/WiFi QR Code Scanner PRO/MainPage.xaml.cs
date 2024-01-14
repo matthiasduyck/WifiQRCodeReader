@@ -558,7 +558,7 @@ namespace WiFi_QR_Code_Scanner_PRO
         }
 
 
-        public async void StoredCredentialsUpdateAsync(List<WifiAccessPointData> accessPointData)
+        public async void StoredCredentialsUpdateAsync(List<WifiAccessPointData> accessPointData, bool resultIsFiltered)
         {
             var accessPointViewData = accessPointData.Select(x => new WifiAccessPointDataViewModelWrapper(x));
             ObservableCollection<WifiAccessPointDataViewModelWrapper> observableCollectionWifiData = new ObservableCollection<WifiAccessPointDataViewModelWrapper>(accessPointViewData);
@@ -573,6 +573,14 @@ namespace WiFi_QR_Code_Scanner_PRO
                 {
                     btnExportAllProfiles.Visibility = Visibility.Visible;
                     btnImportProfiles.Visibility = Visibility.Visible;
+                    txtStoredWifiFilter.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    if (!resultIsFiltered)
+                    {
+                        txtStoredWifiFilter.Visibility = Visibility.Collapsed;
+                    }
                 }
             }
             );
@@ -798,6 +806,12 @@ namespace WiFi_QR_Code_Scanner_PRO
             }
 
             SettingsManager.ReplaceExistingSetting(qRSettings);
+        }
+
+        private void txtStoredWifiFilter_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var searchString = txtStoredWifiFilter.Text;
+            storedCredentialsManager.filterStoredCredentials(txtStoredWifiFilter.Text);
         }
     }
     // This wrapper is needed because the base class cannot be linked in the main page

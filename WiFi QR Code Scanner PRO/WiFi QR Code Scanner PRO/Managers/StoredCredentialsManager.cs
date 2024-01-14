@@ -41,7 +41,7 @@ using Wifi_QR_code_scanner;
 
 namespace WiFi_QR_Code_Scanner_PRO.Managers
 {
-    public delegate void StoredCredentialsUpdateDelegate(List<WifiAccessPointData> accessPointData);
+    public delegate void StoredCredentialsUpdateDelegate(List<WifiAccessPointData> accessPointData, bool resultIsFiltered);
 
     public class StoredCredentialsManager
     {
@@ -49,6 +49,8 @@ namespace WiFi_QR_Code_Scanner_PRO.Managers
         private StorageFolder ApplicationDataFolder;
 
         private IReadOnlyList<StorageFile> Files;
+
+        private List<WifiAccessPointData> lastResult;
 
         private const string ApplicationFolderName = ApplicationSettings.WiFiQRCodeScannerPROFolderName;
 
@@ -79,6 +81,17 @@ namespace WiFi_QR_Code_Scanner_PRO.Managers
             }
             
             
+        }
+
+        public void filterStoredCredentials(string filterKeyWord)
+        {
+            var filteredResult = lastResult;
+            if (filterKeyWord.Length > 0)
+            {
+                filteredResult = lastResult.Where(r => r.ssid.Contains(filterKeyWord,StringComparison.InvariantCultureIgnoreCase) || r.password.Contains(filterKeyWord, StringComparison.InvariantCultureIgnoreCase)).ToList();
+            }
+            
+            this.StoredCredentialsUpdateDelegate(filteredResult, true);
         }
 
         private async void SetupApplicationDataFolderAndSubscribeChanges()
@@ -190,8 +203,8 @@ namespace WiFi_QR_Code_Scanner_PRO.Managers
                     
                 }
             }
-
-            this.StoredCredentialsUpdateDelegate(result);
+            lastResult = result;
+            this.StoredCredentialsUpdateDelegate(result, false);
         }
 
         private WifiAccessPointData MapWLANProfileToWifiAccessPointData(WLANProfile wlanProfile)
