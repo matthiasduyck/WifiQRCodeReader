@@ -47,6 +47,7 @@ namespace WiFi_QR_Code_Scanner_PRO
         StoredCredentialsManager storedCredentialsManager;
         BarcodeManager barcodeManager;
         ISettingsManager SettingsManager;
+        WifiNotesManager WifiNotesManager;
         System.Threading.Timer scanningTimer;
         CancellationTokenSource qrAnalyzerCancellationTokenSource;
 
@@ -68,9 +69,9 @@ namespace WiFi_QR_Code_Scanner_PRO
 
             SettingsManager = new WifiSettingsManager();
             cameraManager = new QRCameraManager(PreviewControl, Dispatcher, handler, qrAnalyzerCancellationTokenSource, SettingsManager);
-
+            WifiNotesManager = new WifiNotesManager();
             StoredCredentialsUpdateDelegate storedCredentialsUpdateDelegate = new StoredCredentialsUpdateDelegate(StoredCredentialsUpdateAsync);
-            storedCredentialsManager = new StoredCredentialsManager(storedCredentialsUpdateDelegate);
+            storedCredentialsManager = new StoredCredentialsManager(storedCredentialsUpdateDelegate, WifiNotesManager);
 
 
             wifiConnectionManager = new WifiConnectionManager();
@@ -608,6 +609,7 @@ namespace WiFi_QR_Code_Scanner_PRO
             this.txtAuthenticationTypeFromStoredNetwork.Text = networkToGenerateQRCodeFor.AccessPointData.wifiAccessPointSecurity.ToString();
             this.txtPasswordFromStoredNetwork.Text = !string.IsNullOrEmpty(networkToGenerateQRCodeFor.AccessPointData.password) ? networkToGenerateQRCodeFor.AccessPointData.password : "No password";
             this.txtSSIDFromStoredNetwork.Text = networkToGenerateQRCodeFor.AccessPointData.ssid;
+            this.txtStoredNetworkNote.Text = networkToGenerateQRCodeFor.AccessPointData.Note ?? "None";
         }
 
         private void BtnCloseQrCodeFromStoredNetwork_Click(object sender, RoutedEventArgs e)
@@ -812,6 +814,21 @@ namespace WiFi_QR_Code_Scanner_PRO
         {
             var searchString = txtStoredWifiFilter.Text;
             storedCredentialsManager.filterStoredCredentials(txtStoredWifiFilter.Text);
+        }
+
+        private async void btnEditNoteFromStoredNetwork_Click(object sender, RoutedEventArgs e)
+        {
+            var networkToGenerateQRCodeFor = ((Windows.UI.Xaml.FrameworkElement)sender).DataContext as WifiAccessPointDataViewModelWrapper;
+            txtNoteInputBox.Text = networkToGenerateQRCodeFor.AccessPointData.Note ?? "";
+            txtNoteHiddenUniqueId.Text = networkToGenerateQRCodeFor.AccessPointData.GetUniqueId();
+            txtNoteChangeDescription.Text = $"Change the note related to the '{networkToGenerateQRCodeFor.DisplaySsid}' network.";
+            await this.networkNoteContentDialog.ShowAsync();
+        }
+
+        private void networkNoteContentDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+        {
+            WifiNotesManager.SaveWifiNote(txtNoteInputBox.Text, txtNoteHiddenUniqueId.Text);
+            BtnRefreshStoredCredentials_Click(null,null);
         }
     }
     // This wrapper is needed because the base class cannot be linked in the main page

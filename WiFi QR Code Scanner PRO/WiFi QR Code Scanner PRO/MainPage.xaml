@@ -113,10 +113,13 @@
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="{x:Bind DisplaySsid}" Margin="0,6,0,0" 
                     Style="{ThemeResource BaseTextBlockStyle}"/>
+                                            <TextBlock Grid.Column="0" Text="{x:Bind DisplayNote}" Margin="0,26,0,0" 
+                    />
                                             <TextBlock  Grid.Column="0" Grid.Row="1" Text="{x:Bind DisplayPassword}" Margin="0,0,0,6" 
                     Style="{ThemeResource BodyTextBlockStyle}"/>
                                             <Grid Grid.RowSpan="2" Grid.Column="1">
                                                 <Button Name="btnGenerateStoredWifiQRCode" Click="BtnShowStoredWifiData_Click" HorizontalAlignment="Right">View Details + QR</Button>
+                                                <Button Name="btnEditNoteFromStoredNetwork" Click="btnEditNoteFromStoredNetwork_Click" Margin="0,0,170,0" HorizontalAlignment="Right">Edit Note</Button>
                                                 <!--<HyperlinkButton Name="btnGenerateStoredWifiQRCode" Click="BtnShowStoredWifiData_Click" HorizontalAlignment="Right">View Details + QR</HyperlinkButton>-->
                                             </Grid>
 
@@ -139,6 +142,10 @@
 
                             <TextBlock VerticalAlignment="Top" Height="23" Margin="0,90,0,0" Text="Authentication Type:" FontWeight="Bold"/>
                             <TextBlock Name="txtAuthenticationTypeFromStoredNetwork" VerticalAlignment="Top" Height="20" Margin="0,110,0,0" Text="Unknown"/>
+
+                            <TextBlock VerticalAlignment="Top" Height="23" Margin="0,135,0,0" Text="Note:" FontWeight="Bold"/>
+                            <TextBlock Name="txtStoredNetworkNote" VerticalAlignment="Top" Height="20" Margin="40,135,0,0" Text="None"/>
+
 
                             <Button Name="btnSaveQrCodeImageFromStoredNetwork" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="130" Margin="0,0,0,0" Click="BtnSaveQrCodeImageFromStoredNetwork_Click">Save QR Code</Button>
                             <Button Name="btnCopyNetworkNameFromStoredNetwork" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="130" Margin="140,0,0,0" Click="BtnCopyNetworkNameFromStoredNetwork_Click">Copy Network</Button>
@@ -203,5 +210,20 @@
             <AppBarToggleButton Name="btnTglSettings" Width="40" Click="btnTglSettings_Click" Icon="Setting" LabelPosition="Collapsed" Label="SymbolIcon" VerticalAlignment="Bottom" HorizontalAlignment="Right" />
             <AppBarButton Name="btnHelp" Click="btnHelp_Click" Width="40" Icon="Help" LabelPosition="Collapsed" Margin="0,0,55,0" Label="SymbolIcon" VerticalAlignment="Bottom" HorizontalAlignment="Right" />
         </Grid>
+        <ContentDialog Visibility="Visible" x:Name="networkNoteContentDialog"
+                       Title="Change network note"
+                       PrimaryButtonText="Save"
+                       PrimaryButtonClick="networkNoteContentDialog_PrimaryButtonClick"
+                       CloseButtonText="Cancel">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Name="txtNoteChangeDescription" Text="Change the note related to this network." Grid.Row="0" Margin="5"/>
+                <TextBox x:Name="txtNoteInputBox" MaxLength="50" Width="350" Height="32" Grid.Row="1" Margin="5" PlaceholderText="My home wifi network note."/>
+                <TextBox Visibility="Collapsed" x:Name="txtNoteHiddenUniqueId" Grid.Row="1"/>
+            </Grid>
+        </ContentDialog>
     </Grid>
 </Page>

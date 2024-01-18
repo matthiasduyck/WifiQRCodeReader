@@ -169,6 +169,9 @@
     <Compile Include="..\..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Managers\QRCameraManager.cs">
       <Link>Managers\QRCameraManager.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Managers\WifiNotesManager.cs">
+      <Link>Managers\WifiNotesManager.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Managers\WifiSettingsManager.cs">
       <Link>Managers\WifiSettingsManager.cs</Link>
     </Compile>

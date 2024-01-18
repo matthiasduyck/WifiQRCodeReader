@@ -38,6 +38,7 @@ using System.Collections.ObjectModel;
 using WiFi_QR_Code_Scanner_PRO.Business;
 using System.Xml.Serialization;
 using Wifi_QR_code_scanner;
+using QR_Library.Managers;
 
 namespace WiFi_QR_Code_Scanner_PRO.Managers
 {
@@ -45,7 +46,7 @@ namespace WiFi_QR_Code_Scanner_PRO.Managers
 
     public class StoredCredentialsManager
     {
-        
+        private WifiNotesManager WifiNotesManager;
         private StorageFolder ApplicationDataFolder;
 
         private IReadOnlyList<StorageFile> Files;
@@ -58,9 +59,10 @@ namespace WiFi_QR_Code_Scanner_PRO.Managers
 
         StoredCredentialsUpdateDelegate StoredCredentialsUpdateDelegate { get; set; }
 
-        public StoredCredentialsManager(StoredCredentialsUpdateDelegate storedCredentialsUpdateDelegate)
+        public StoredCredentialsManager(StoredCredentialsUpdateDelegate storedCredentialsUpdateDelegate, WifiNotesManager wifiNotesManager)
         {
             StoredCredentialsUpdateDelegate = storedCredentialsUpdateDelegate;
+            WifiNotesManager = wifiNotesManager;
         }
 
         /// <span class="code-SummaryComment"><summary></span>
@@ -193,7 +195,7 @@ namespace WiFi_QR_Code_Scanner_PRO.Managers
                     try
                     {
                         var wlanProfile = (WLANProfile)serializer.Deserialize(reader);
-                        result.Add(MapWLANProfileToWifiAccessPointData(wlanProfile));
+                        result.Add(await MapWLANProfileToWifiAccessPointData(wlanProfile));
                     }
                     catch(Exception e)
                     {
@@ -207,7 +209,7 @@ namespace WiFi_QR_Code_Scanner_PRO.Managers
             this.StoredCredentialsUpdateDelegate(result, false);
         }
 
-        private WifiAccessPointData MapWLANProfileToWifiAccessPointData(WLANProfile wlanProfile)
+        private async Task<WifiAccessPointData> MapWLANProfileToWifiAccessPointData(WLANProfile wlanProfile)
         {
             var result = new WifiAccessPointData()
             {
@@ -227,6 +229,8 @@ namespace WiFi_QR_Code_Scanner_PRO.Managers
             {
                 result.wifiAccessPointSecurity = WifiAccessPointSecurity.WEP;
             }
+
+            result.Note = await WifiNotesManager.GetWifiNote(result.GetUniqueId());
 
             return result;
         }
