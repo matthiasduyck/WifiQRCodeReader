@@ -91,6 +91,12 @@ namespace FullTrust
             processWifi.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
             processWifi.StartInfo.FileName = "netsh";
             var applicationDataFolder = ApplicationData.Current.LocalSettings.Values[ApplicationSettings.LocalSettingsApplicationDataFolderSettingName] as string;
+            //first delete all preexisting xml files in this folder:
+            foreach(string xmlFile in Directory.GetFiles(applicationDataFolder, "*.xml"))
+            {
+                File.Delete(xmlFile);
+            }
+
             processWifi.StartInfo.Arguments = "wlan export profile key=clear folder=\""+ applicationDataFolder + "\"";
 
             processWifi.StartInfo.UseShellExecute = false;
