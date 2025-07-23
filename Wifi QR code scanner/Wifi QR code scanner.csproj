@@ -24,7 +24,7 @@
     <AppxBundlePlatforms>x86|x64|arm|arm64</AppxBundlePlatforms>
     <PackageCertificateThumbprint>
     </PackageCertificateThumbprint>
-    <AppInstallerUpdateFrequency>1</AppInstallerUpdateFrequency>
+    <AppInstallerUpdateFrequency>0</AppInstallerUpdateFrequency>
     <AppInstallerCheckForUpdateFrequency>OnApplicationRun</AppInstallerCheckForUpdateFrequency>
     <AppxPackageDir>C:\Users\Matthias\Documents\</AppxPackageDir>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
@@ -131,11 +131,20 @@
     <Compile Include="..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Business\AppStatus.cs">
       <Link>Business\AppStatus.cs</Link>
     </Compile>
+    <Compile Include="..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Business\BaseQRSettings.cs">
+      <Link>Business\BaseQRSettings.cs</Link>
+    </Compile>
     <Compile Include="..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Business\ComboboxItem.cs">
       <Link>Business\ComboboxItem.cs</Link>
     </Compile>
     <Compile Include="..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Business\FrameSourceInformation.cs">
       <Link>Business\FrameSourceInformation.cs</Link>
+    </Compile>
+    <Compile Include="..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Business\IQRSettings.cs">
+      <Link>Business\IQRSettings.cs</Link>
+    </Compile>
+    <Compile Include="..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Business\ScanningResolutionEnum.cs">
+      <Link>Business\ScanningResolutionEnum.cs</Link>
     </Compile>
     <Compile Include="..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Business\WifiAccessPointData.cs">
       <Link>Business\WifiAccessPointData.cs</Link>
@@ -145,6 +154,9 @@
     </Compile>
     <Compile Include="..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Managers\BarcodeManager.cs">
       <Link>Managers\BarcodeManager.cs</Link>
+    </Compile>
+    <Compile Include="..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Managers\ISettingsManager.cs">
+      <Link>Managers\ISettingsManager.cs</Link>
     </Compile>
     <Compile Include="..\..\QR Code Shared Library\QR Code Shared Library\QR Library\Managers\MessageManager.cs">
       <Link>Managers\MessageManager.cs</Link>
@@ -199,6 +211,9 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
       <Version>6.2.8</Version>
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>13.0.3</Version>
     </PackageReference>
     <PackageReference Include="ZXing.Net">
       <Version>0.16.4</Version>

@@ -56,7 +56,7 @@ namespace Wifi_QR_code_scanner
 
             QrCodeDecodedDelegate handler = new QrCodeDecodedDelegate(handleQRcodeFound);
             qrAnalyzerCancellationTokenSource = new CancellationTokenSource();
-            cameraManager = new QRCameraManager(PreviewControl, Dispatcher, handler, qrAnalyzerCancellationTokenSource);
+            cameraManager = new QRCameraManager(PreviewControl, Dispatcher, handler, qrAnalyzerCancellationTokenSource,null);
             wifiConnectionManager = new WifiConnectionManager();
             barcodeManager = new BarcodeManager();
             Application.Current.Suspending += Application_Suspending;
@@ -65,9 +65,7 @@ namespace Wifi_QR_code_scanner
             cameraManager.EnumerateCameras(cmbCameraSelect);
             StartScanningForNetworks();
 
-            this.donateLnk.NavigateUri = new Uri("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=MSU2BD59P7442&source=url");            
-            this.donateLnkGenerate.NavigateUri = new Uri("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=MSU2BD59P7442&source=url");            
-            this.donateLnkOpen.NavigateUri = new Uri("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=MSU2BD59P7442&source=url");
+            this.donateLnk.NavigateUri = new Uri("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=MSU2BD59P7442&source=url");
             PreviewStoredCredentials();
             if (NagwareManager.ShouldNag())
             {
@@ -538,6 +536,39 @@ namespace Wifi_QR_code_scanner
         private void BtnCloseNagware_Click(object sender, RoutedEventArgs e)
         {
             GrdNagware.Visibility = Visibility.Collapsed;
+        }
+        private void btnHelp_Click(object sender, RoutedEventArgs e)
+        {
+            Windows.System.Launcher.LaunchUriAsync(new Uri("https://matthiasduyck.wordpress.com/wifi-qr-code-scanner/help-faq/"));
+        }
+
+        private void btnTglSettings_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.btnTglSettings.IsChecked ?? false)
+            {
+                this.grdSettings.Visibility = Visibility.Visible;
+                //todo load state of inputs from settings file if exists
+            }
+            else
+            {
+                this.grdSettings.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void lnkSettingsClear_Click(object sender, RoutedEventArgs e)
+        {
+            //todo, simply delete the settingsfile
+        }
+
+        private void btnCancel_Click(object sender, RoutedEventArgs e)
+        {
+            this.grdSettings.Visibility = Visibility.Collapsed;
+            this.btnTglSettings.IsChecked = false;
+        }
+
+        private void btnSaveSettings_Click(object sender, RoutedEventArgs e)
+        {
+            //todo write values to file
         }
     }
     // This wrapper is needed because the base class cannot be linked in the main page

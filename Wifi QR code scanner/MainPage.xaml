@@ -20,7 +20,7 @@
 
                     <CaptureElement Name="PreviewControl" Stretch="Uniform" Margin="0,0,0,40"/>
 
-                    <ListView Name="lstNetworks" Width="160"  VerticalAlignment="Stretch" Padding="2,8,2,2" HorizontalAlignment="Right" Opacity="0.5" Header="   Nearby networks:" Visibility="Visible" Background="Gray" Margin="0,0,0,0" PointerEntered="LstNetworks_PointerEntered" PointerExited="LstNetworks_PointerExited">
+                    <ListView Name="lstNetworks" Width="160"  VerticalAlignment="Stretch" Padding="2,8,2,2" HorizontalAlignment="Right" Opacity="0.5" Header="   Nearby networks:" Visibility="Visible" Background="Gray" Margin="0,0,0,40" PointerEntered="LstNetworks_PointerEntered" PointerExited="LstNetworks_PointerExited">
                         <ListView.ItemTemplate>
                             <DataTemplate x:Name="lstItemTemplate">
                                 <Grid>
@@ -34,7 +34,6 @@
                     <ComboBox SelectionChanged="CmbCameraSelect_SelectionChanged" Name="cmbCameraSelect" SelectedIndex="0" Height="30" Margin="0,0,0,5" Width="168" VerticalAlignment="Bottom">
                         <ComboBoxItem Name="Select">Select Camera</ComboBoxItem>
                     </ComboBox>
-                    <HyperlinkButton Name="donateLnk" Content="Donate to the developer" Margin="0,0,5,6" VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
                 </Grid>
             </PivotItem>
             <PivotItem Header="Create Code">
@@ -63,7 +62,6 @@
                         <Image Name="imgQrCode" VerticalAlignment="Top" Height="200" Margin="0,282,0,0"></Image>
                         <Button Name="btnSaveFile" VerticalAlignment="Top" Height="30" Margin="0,452,0,0" Click="BtnSaveFile_Click" Visibility="Collapsed">Save QR Code File</Button>
                         <Button Name="btnGenerateRandomPassword" Content="Generate Random Strong Password" Height="32" Margin="0,172,0,0" VerticalAlignment="Top" Width="242" HorizontalAlignment="Right" Click="BtnGenerateRandomPassword_Click"/>
-                        <HyperlinkButton Name="donateLnkGenerate" Content="Donate to the developer" Margin="0,0,0,6" VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
                     </Grid>
                 </ScrollViewer>
 
@@ -73,7 +71,6 @@
                     <Grid Margin="20,20,20,20">
                         <TextBlock VerticalAlignment="Top" Height="30" Text="Open an image containing a WiFi QR Code:"/>
                         <Button Name="btnOpenQRImage" VerticalAlignment="Top" Height="35" Margin="0,30,0,0" Click="BtnOpenQRImage_ClickAsync">Open Image File</Button>
-                        <HyperlinkButton Name="donateLnkOpen" Content="Donate to the developer" Margin="0,0,0,6" VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
                     </Grid>
                 </ScrollViewer>
             </PivotItem>
@@ -92,9 +89,15 @@
                             <Button Opacity="0.3" Margin="0,30,0,0" VerticalAlignment="Top" Name="btnRefreshStoredCredentials">
                                 Load/Refresh Wi-Fi profiles
                             </Button>
+                            <Button Visibility="Collapsed" Margin="0,30,120,0" VerticalAlignment="Top" HorizontalAlignment="Right" Name="btnExportAllProfiles">
+                                Export profiles
+                            </Button>
+                            <Button Visibility="Collapsed" Margin="0,30,0,0" VerticalAlignment="Top" HorizontalAlignment="Right" Name="btnImportProfiles">
+                                Import profiles
+                            </Button>
+                            <TextBox Visibility="Collapsed" VerticalAlignment="Top" HorizontalAlignment="Left" Width="300" Height="32" Margin="0,70,0,0" Name="txtStoredWifiFilter" PlaceholderText="Filter"></TextBox>
                             
-                            
-                            <ListView Margin="0,90,0,0" x:Name="ContactsLV" Opacity="0.3">
+                            <ListView Margin="0,120,0,0" x:Name="ContactsLV" Opacity="0.3">
                                 <ListView.ItemContainerStyle>
                                     <Style TargetType="ListViewItem">
                                         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -140,6 +143,9 @@
                             <TextBlock VerticalAlignment="Top" Height="23" Margin="0,90,0,0" Text="Authentication Type:" FontWeight="Bold"/>
                             <TextBlock Name="txtAuthenticationTypeFromStoredNetwork" VerticalAlignment="Top" Height="20" Margin="0,110,0,0" Text="WPA"/>
 
+                            <TextBlock VerticalAlignment="Top" Height="23" Margin="0,135,0,0" Text="Note:" FontWeight="Bold"/>
+                            <TextBlock Name="txtStoredNetworkNote" VerticalAlignment="Top" Height="20" Margin="40,135,0,0" Text="None"/>
+
                             <Button Name="btnSaveQrCodeImageFromStoredNetwork" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="130" Margin="0,0,0,0">Save QR Code</Button>
                             <Button Name="btnCopyNetworkNameFromStoredNetwork" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="130" Margin="140,0,0,0">Copy Network</Button>
                             <Button Name="btnCopyPasswordFromStoredNetwork" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="130" Margin="280,0,0,0" >Copy Password</Button>
@@ -168,6 +174,66 @@
                     <Button Click="BtnCloseNagware_Click" Name="BtnCloseNagware" HorizontalAlignment="Left">Close</Button>
                 </Grid>
             </StackPanel>
+        </Grid>
+        <Grid Name="grdSettings" Visibility="Collapsed" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+            <ScrollViewer Opacity="0.3">
+                <Grid>
+                    <StackPanel Margin="20,20,20,100">
+                        <TextBlock FontWeight="SemiBold" FontSize="21" Margin="0,0,0,30">Settings</TextBlock>
+                        <StackPanel Margin="0,5,0,20">
+                            <TextBlock Margin="0,0,0,10" FontWeight="SemiBold" FontSize="20">Scanning options</TextBlock>
+                            <TextBlock Margin="0,0,0,5" FontWeight="Normal" FontSize="18">Scanning refresh rate</TextBlock>
+                            <TextBlock FontSize="10" Margin="0,0,0,5">(in milliseconds lower is faster, but requires more CPU)</TextBlock>
+                            <ComboBox Name="cmbRefreshRate" Margin="0,0,0,20">
+                                <ComboBoxItem Name="refresh50">50</ComboBoxItem>
+                                <ComboBoxItem Name="refresh100">100</ComboBoxItem>
+                                <ComboBoxItem Name="refresh150" IsSelected="True">150 (default)</ComboBoxItem>
+                                <ComboBoxItem Name="refresh200">200</ComboBoxItem>
+                            </ComboBox>
+                            <TextBlock Margin="0,0,0,5" FontWeight="Normal" FontSize="18">Scanning Resolution</TextBlock>
+                            <TextBlock FontSize="10" Margin="0,0,0,5">(higher is better but requires more CPU)</TextBlock>
+                            <ComboBox Name="cmbScanResolution" Margin="0,0,0,20">
+                                <ComboBoxItem Name="lowest">lowest</ComboBoxItem>
+                                <ComboBoxItem Name="auto" IsSelected="True">auto (default)</ComboBoxItem>
+                                <ComboBoxItem Name="highest">highest</ComboBoxItem>
+                            </ComboBox>
+                        </StackPanel>
+                        <StackPanel Margin="0,5,0,20">
+                            <TextBlock Margin="0,0,0,10" FontWeight="SemiBold" FontSize="20">QR image creation options</TextBlock>
+                            <TextBlock Margin="0,0,0,5" FontWeight="Normal" FontSize="18">QR code image resolution</TextBlock>
+                            <TextBlock FontSize="10" Margin="0,0,0,5">(in pixels width and height)</TextBlock>
+                            <!--<control:NumberBox Minimum="10" Maximum="5000" Width="100" HorizontalAlignment="Left" x:Name="nmbQRCodeImageResolution" Value="200"  SpinButtonPlacementMode="Compact" SmallChange="10" LargeChange="100" />-->
+                        </StackPanel>
+                        <StackPanel Margin="0,5,0,20">
+                            <TextBlock Margin="0,0,0,10" FontWeight="SemiBold" FontSize="20">General options</TextBlock>
+                            <TextBlock Margin="0,0,0,5" FontWeight="Normal" FontSize="18">Copy results to clipboard immediately when found.</TextBlock>
+                            <CheckBox Name="chckCopyToClipboardImmediately"></CheckBox>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
+            <Grid VerticalAlignment="Bottom" Height="100" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" BorderBrush="Gray" BorderThickness="1">
+                <StackPanel Margin="20,20,20,20" >
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Button Name="btnSaveSettings" Click="btnSaveSettings_Click" Margin="0,0,15,0">Save</Button>
+                        <Button Name="btnCancel" Click="btnCancel_Click" Margin="0,0,15,0">Cancel</Button>
+                        <HyperlinkButton Name="lnkSettingsClear" Click="lnkSettingsClear_Click" Margin="0,0,15,0">Clear custom settings</HyperlinkButton>
+                    </StackPanel>
+
+                    <TextBlock Margin="0,0,0,0">Restart for changes to take effect.</TextBlock>
+                </StackPanel>
+            </Grid>
+            <Grid Margin="0,65,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"  Padding="25" BorderBrush="Gray" BorderThickness="0,1,0,0">
+                <TextBlock FontWeight="Medium" TextAlignment="Center">
+                                This feature is only available in the PRO version: <LineBreak></LineBreak>
+                                    <Hyperlink NavigateUri="https://www.microsoft.com/en-us/p/wifi-qr-code-scanner-pro/9nkj4pt4llj6">https://www.microsoft.com/en-us/p/wifi-qr-code-scanner-pro/9nkj4pt4llj6</Hyperlink>
+                </TextBlock>
+            </Grid>
+        </Grid>
+        <Grid Name="grdSharedContent" Margin="12,0,12,0">
+            <HyperlinkButton Name="donateLnk" Content="Donate to the developer" Margin="0,0,110,6" VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
+            <AppBarToggleButton Name="btnTglSettings" Width="40" Click="btnTglSettings_Click" Icon="Setting" LabelPosition="Collapsed" Label="SymbolIcon" VerticalAlignment="Bottom" HorizontalAlignment="Right" />
+            <AppBarButton Name="btnHelp" Click="btnHelp_Click" Width="40" Icon="Help" LabelPosition="Collapsed" Margin="0,0,55,0" Label="SymbolIcon" VerticalAlignment="Bottom" HorizontalAlignment="Right" />
         </Grid>
     </Grid>
 </Page>

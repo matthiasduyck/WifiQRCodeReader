@@ -9,7 +9,7 @@
   <Identity
     Name="59867MatthiasDuyck.WiFiQRCodeScannerPRO"
     Publisher="CN=DA2D21D8-3390-4818-A996-7B7A779D9778"
-    Version="0.1.4.0" />
+    Version="0.1.6.0" />
 
   <Properties>
     <DisplayName>WiFi QR Code Scanner PRO</DisplayName>
